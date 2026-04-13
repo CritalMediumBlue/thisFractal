@@ -1,38 +1,56 @@
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { Constants } from './constants.js';
 
 export class Canvas {
     constructor() {
-        this.canvas = document.querySelector('#canvas');
-        this.ctx = this.canvas.getContext('2d'); 
+        // Scene
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0xf0f0f0);
+
+        // Camera — position above the simulation starting area
+        const aspect = window.innerWidth / window.innerHeight;
+        this.camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 50000);
+
+        // Spore starts near (250, 78); hyphae grow outward from there
+        const cx = Constants.CANVAS_WIDTH / 10;
+        const cy = Constants.CANVAS_HEIGHT / 18;
+        this.camera.position.set(cx, cy, 500);
+        this.camera.lookAt(cx, cy, 0);
+
+        // Renderer
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(this.renderer.domElement);
+
+        // Expose domElement so existing code that reads `this.canvas.canvas` still works
+        this.canvas = this.renderer.domElement;
+
+        // Lights
+        const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+        this.scene.add(ambient);
+
+        const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+        dir.position.set(cx, cy, 500);
+        this.scene.add(dir);
+
+        // OrbitControls
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.target.set(cx, cy, 0);
+        this.controls.enableDamping = true;
+        this.controls.update();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     }
 
-    writeText(text, x, y, size=20, color='black', align='left') {
-        this.ctx.fillStyle = color;
-        this.ctx.font = `bold ${size}px Arial`;        
-        this.ctx.textAlign = align; // Center the text horizontally
-        this.ctx.fillText(text, x, y);
-    }
-
-    strokeRect(x, y, width, height, color, lineWidth) {
-        this.ctx.strokeStyle = color;
-        this.ctx.lineWidth = lineWidth;
-        this.ctx.fillStyle = color;
-        this.ctx.strokeRect(x, y, width, height);
-    }
-    fillRect(x, y, width, height, color) {
-        this.ctx.fillStyle = color;
-        this.ctx.fillRect(x, y, width, height);
-    }
-    drawScientificNotation( text, text2, x, y) {
-        this.ctx.fillStyle = 'black';
-
-        const parts = text.split('^');
-        this.ctx.font = '22px Arial';
-        this.ctx.fillText(parts[0], x, y);
-        const measure = this.ctx.measureText(parts[0]).width;
-        this.ctx.font = '18px Arial';
-        this.ctx.fillText(parts[1], x +measure, y - 10);
-        this.ctx.font = '22px Arial';
-        const measure2 = this.ctx.measureText(parts[1]).width;
-        this.ctx.fillText(text2, x +measure + measure2, y );
+    render() {
+        this.controls.update();
+        this.renderer.render(this.scene, this.camera);
     }
 }

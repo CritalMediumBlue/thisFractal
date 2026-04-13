@@ -72,37 +72,7 @@ export class BrownianParticle {
   
     
 
-    draw(ctx, shift) {
-        const Factor = 1.5;
-
-        if( Factor*this.x > 0 && Factor*this.y > 0 && Factor*this.x < Constants.CANVAS_WIDTH/3 && Factor*this.y < Constants.CANVAS_HEIGHT){
-
-        const size = (0.5)*Constants.MICROMETER_TO_PIXEL;
-        ctx.fillStyle = 'rgba(0, 100, 0, 1)';
-        //ctx.strokeStyle =  'rgb(0, 0, 0)';
-        //ctx.lineWidth = 1;
-
-        ctx.beginPath();
-        ctx.arc(Factor*this.x + shift, Factor*this.y, size, 0, 2 * Math.PI);
-        ctx.fill();
-        //ctx.stroke();
-        ctx.closePath();
-        ctx.beginPath();
-        ctx.fillStyle = 'rgb(150, 255, 150)';
-        ctx.arc(Factor*this.x + shift, Factor*this.y, size/2, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.closePath();
-
-        if (this.isTraced && this.trace.length > 1 && Constants.addtrace) {
-            ctx.strokeStyle = 'rgba(150, 255, 150)';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(this.trace[0].x*Factor + shift, this.trace[0].y*Factor);
-            for (let i = 0; i < this.trace.length; i ++) {
-                ctx.lineTo(this.trace[i].x*Factor + shift, this.trace[i].y*Factor);
-            }
-            ctx.stroke();
-        }
-    }
+    draw() {
+        // Rendering is now handled centrally via InstancedMesh in Simulation.draw()
     }
 }

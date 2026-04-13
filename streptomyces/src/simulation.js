@@ -3,7 +3,12 @@ import { Canvas } from './canvas.js';
 import { CytoplasmSegment } from './cytoplasmSegment.js';
 import { BrownianParticle } from './brownianParticle.js';
 import { Quadtree } from './quadtree.js';
-import { viridisScaleAge, viridisScaleATP, viridisScaleConsumption } from './colorScales.js';
+import { viridisToThreeColor } from './colorScales.js';
+import * as THREE from 'three';
+
+const MAX_PARTICLES = 10000;
+const _dummy = new THREE.Object3D();
+const _color = new THREE.Color();
 
 export class Simulation {
     constructor() { 
@@ -86,7 +91,45 @@ export class Simulation {
         this.neighborIndices = new Int16Array(Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS*3); // the maximum number of neighbors is 3
         //console.log(this.iterations);
 
+        // --- Three.js InstancedMesh setup ---
+        this._initMeshes();
+    }
 
+    _initMeshes() {
+        // Remove previous meshes if they exist (simulation reset)
+        if (this.segmentMesh) {
+            this.canvas.scene.remove(this.segmentMesh);
+            this.segmentMesh.geometry.dispose();
+            this.segmentMesh.material.dispose();
+        }
+        if (this.particleMesh) {
+            this.canvas.scene.remove(this.particleMesh);
+            this.particleMesh.geometry.dispose();
+            this.particleMesh.material.dispose();
+        }
+
+        // Segment spheres
+        const segGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, 16, 16);
+        const segMat = new THREE.MeshStandardMaterial({ vertexColors: false });
+        this.segmentMesh = new THREE.InstancedMesh(segGeo, segMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
+        this.segmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        // Allocate instance color buffer
+        this.segmentMesh.instanceColor = new THREE.InstancedBufferAttribute(
+            new Float32Array(Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS * 3), 3
+        );
+        this.segmentMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+        this.segmentMesh.count = 0;
+        this.segmentMesh.frustumCulled = false;
+        this.canvas.scene.add(this.segmentMesh);
+
+        // Particle spheres (smaller, green)
+        const partGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS * 0.4, 8, 8);
+        const partMat = new THREE.MeshStandardMaterial({ color: 0x66ff66 });
+        this.particleMesh = new THREE.InstancedMesh(partGeo, partMat, MAX_PARTICLES);
+        this.particleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        this.particleMesh.count = 0;
+        this.particleMesh.frustumCulled = false;
+        this.canvas.scene.add(this.particleMesh);
     }
 
     updateSegmentToArrayIndex() {
@@ -150,7 +193,7 @@ export class Simulation {
     }
 
     getCanvas() {
-        return this.canvas.canvas;
+        return this.canvas.renderer.domElement;
     }
     
     
@@ -710,244 +753,36 @@ export class Simulation {
     }
 
     draw() {
-        this.drawBackground();
-        this.drawCytoplasmSegments();
-        this.drawLabels();
-        //this.drawBorders();
-        this.drawScaleBars();
-    }
+        const segCount = this.numberOfCytoplasmSegments;
+        this.segmentMesh.count = segCount;
 
-
-    drawBackground() {
-        this.canvas.ctx.fillStyle = 'white';
-        this.canvas.ctx.fillRect(0, 0, Constants.CANVAS_WIDTH, Constants.CANVAS_HEIGHT-155);
-    }
-
-    drawCytoplasmSegments() {
-        this.cytoplasmSegments.forEach(segment => {
-            [0, Constants.CANVAS_WIDTH / 3, Constants.CANVAS_WIDTH / 3 * 2].forEach(shift => {
-                segment.draw(this.canvas, shift);
-            });
-        });
-        this.brownianParticles.forEach(particle => {
-            [0, Constants.CANVAS_WIDTH / 3, Constants.CANVAS_WIDTH / 3 * 2].forEach(shift => {
-                particle.draw(this.canvas.ctx, shift);
-            });
-        });
-    }
-
-    drawBorders() {
-        for (let i = 0; i < 3; i++) {
-            this.canvas.strokeRect(
-                i * Constants.CANVAS_WIDTH / 3 + Constants.BORDER / 2,
-                Constants.BORDER / 2,
-                Constants.CANVAS_WIDTH / 3 - Constants.BORDER,
-                Constants.CANVAS_HEIGHT - Constants.BORDER,
-                Constants.BORDER_COLOR,
-                Constants.BORDER_WIDTH
-            );
+        for (let i = 0; i < segCount; i++) {
+            const seg = this.cytoplasmSegments[i];
+            _dummy.position.set(seg.x, seg.y, 0);
+            _dummy.updateMatrix();
+            this.segmentMesh.setMatrixAt(i, _dummy.matrix);
+            viridisToThreeColor(seg.ATPConcentration, _color);
+            this.segmentMesh.setColorAt(i, _color);
         }
-    }
+        this.segmentMesh.instanceMatrix.needsUpdate = true;
+        if (this.segmentMesh.instanceColor) this.segmentMesh.instanceColor.needsUpdate = true;
 
-    drawLabels() {
-        const labelY = 40;
-        const labelX = 400;
-        this.canvas.ctx.textAlign = 'left';
-        
-        this.canvas.drawScientificNotation( 'Available ATP [x10^6', 'molecules]', Constants.CANVAS_WIDTH / 2 - labelX, labelY);
+        const partCount = Math.min(this.brownianParticles.length, MAX_PARTICLES);
+        this.particleMesh.count = partCount;
 
-        //this.canvas.writeText('Available ATP [x10^6]', Constants.CANVAS_WIDTH / 2-labelX, labelY);
-        this.canvas.drawScientificNotation('Available macromolecules [x10^6', 'molecules]', Constants.CANVAS_WIDTH / 6-labelX, labelY);
-        this.canvas.drawScientificNotation('ATP consumption rate [x10^6 ', 'molecules / s]', 5 * Constants.CANVAS_WIDTH / 6-labelX, labelY);
-    
-        const totalSeconds = this.time ;
-        const minutes = Math.floor(totalSeconds / 60);
-        const hours = Math.floor(minutes / 60);
-        
-        const formattedTime = `${String(hours).padStart(2, '0')}: ${String(minutes % 60).padStart(2, '0')}: ${String(totalSeconds % 60).padStart(2, '0')}`;
-        
-        //this.canvas.ctx.drawScientificNotation('Total MacMol (1,2): ${this.totalMacromolecules1.toFixed(4)} | ${this.totalMacromolecules2.toFixed(4)  
-        this.canvas.ctx.fillText(`Total MacMol (1,2): ${this.totalMacromolecules1.toFixed(4)} | ${this.totalMacromolecules2.toFixed(4)}  x10^6`, Constants.CANVAS_WIDTH / 6-labelX, Constants.CANVAS_HEIGHT - 220);
-        this.canvas.ctx.fillText(`Average MacMol: ${this.averageMacromolecules.toFixed(4)} x10^6`, Constants.CANVAS_WIDTH / 6-labelX, Constants.CANVAS_HEIGHT - 200);
-        this.canvas.ctx.fillText(`MacMol cons. rate (1): ${this.totalMacromoleculesConsumptionRate1.toFixed(4)} || ${this.consumtionOfMacromoleculesInOneSecond.reduce((sum, value) => sum + value, 0).toFixed(4)}x10^6 / s`, Constants.CANVAS_WIDTH / 6-labelX, Constants.CANVAS_HEIGHT - 180);
-        this.canvas.ctx.fillText(`MacMol prod. rate (1):  ${this.productionOfMacromoleculesInOneSecond.reduce((sum, value) => sum + value, 0).toFixed(4)}   x10^6 / s`, Constants.CANVAS_WIDTH / 6-labelX, Constants.CANVAS_HEIGHT - 160);
-        
-        this.canvas.ctx.fillText(`Total ATP(1,2): ${this.totalATP1.toFixed(4)} | ${this.totalATP2.toFixed(4)} x10^6`, Constants.CANVAS_WIDTH / 2-labelX, Constants.CANVAS_HEIGHT - 220);
-        this.canvas.ctx.fillText(`Average ATP: ${this.averageATPConcentration.toFixed(4)} x10^6`, Constants.CANVAS_WIDTH / 2-labelX, Constants.CANVAS_HEIGHT - 200);
-        this.canvas.ctx.fillText(`ATP cons. rate: ${this.totalATPConsumptionRate1.toFixed(4)} x10^6 / s`, Constants.CANVAS_WIDTH / 2-labelX, Constants.CANVAS_HEIGHT - 180);
-        this.canvas.ctx.fillText(`ATP prod. rate (1): ${this.productionOfATPInOneSecond.reduce((sum, value) => sum + value, 0).toFixed(4)} x10^6 / s`, Constants.CANVAS_WIDTH / 2-labelX, Constants.CANVAS_HEIGHT - 160);
-     
-        this.canvas.ctx.fillText(`${formattedTime}`, 5*Constants.CANVAS_WIDTH / 6 - labelX, Constants.CANVAS_HEIGHT - 220);
-        this.canvas.ctx.fillText(`Total length: ${this.totalLengthOfHyphae.toFixed(1)} µm  | ${this.numberOfCytoplasmSegments} segments` , 5*Constants.CANVAS_WIDTH / 6-labelX, Constants.CANVAS_HEIGHT - 200);
-        this.canvas.ctx.fillText(`Growth rate of 1st branch: ${ this.GrowthRateOfFirstBranch.toFixed(2)} µm / min`, 5*Constants.CANVAS_WIDTH / 6-labelX, Constants.CANVAS_HEIGHT - 180);
-        this.canvas.ctx.fillText(`Total foci: ${this.brownianParticles.length} foci | ${this.totalVolumeOfFoci.toFixed(3)} µm^3`, 5*Constants.CANVAS_WIDTH / 6-labelX, Constants.CANVAS_HEIGHT - 160);
-        
-        
+        for (let i = 0; i < partCount; i++) {
+            const p = this.brownianParticles[i];
+            _dummy.position.set(p.x, p.y, 0);
+            _dummy.updateMatrix();
+            this.particleMesh.setMatrixAt(i, _dummy.matrix);
+        }
+        this.particleMesh.instanceMatrix.needsUpdate = true;
+
+        this.canvas.render();
     }
 
     drawPlots() {
-        const time = this.time;
-        const historyATP = this.history.ATP.slice(0, time);
-        const historyAverageATP = this.history.averageATP.slice(0, time);
-        //const historyATPConsumptionRate = this.history.totalATPConsumptionRate.slice(0, time);
-        const historyAverageMacromolecules = this.history.averageMacromolecules.slice(0, time); 
-        const historyLength = this.history.lengthOfFirstBranch.slice(0, time); 
-        const historyGrowthRate = this.history.GrowthRateOfFirstBranch.slice(0, time); 
-        const historyMacromoleculesConsumptionRate = this.history.MacromoleculesConsumptionRate.slice(0, time);
-        this.canvas.ctx.fillStyle = 'white';
-        this.canvas.ctx.fillRect(0, Constants.CANVAS_HEIGHT-155, Constants.CANVAS_WIDTH, Constants.CANVAS_HEIGHT);
-        
-        this.drawSinglePlot(historyLength, historyGrowthRate,  2 * Constants.CANVAS_WIDTH / 3,  "Len first branch (µm)","Growth rate (µm/min)",time);
-        this.drawSinglePlot(historyATP, historyAverageATP, Constants.CANVAS_WIDTH / 3, "Total ATP", "Average ATP ",time);
-        this.drawSinglePlot(historyAverageMacromolecules, historyMacromoleculesConsumptionRate, 0, "Average Macmol", "Macr. consum. rate",time);
-    }
-
-    drawSinglePlot(historyOnTheLeft, historyOnTheRight, XPosition, leftLabel, rightLabel,time) {
-        // draw history of ATP in a plot
-        const numberOfDataPoints = time;//20000; // 2 hours and 46 minutes
-        const slicedHistoryLeft = historyOnTheLeft;//.slice(-numberOfDataPoints);
-        const slicedHistoryRight = historyOnTheRight//.slice(-numberOfDataPoints);
-        const plotX = XPosition + 55;
-        const plotY = Constants.CANVAS_HEIGHT - 150;
-        const plotWidth = Constants.CANVAS_WIDTH / 3 - 110;
-        const plotHeight = 130;
-        const plotLeftColor = 'rgb(200, 0, 0)';
-        const plotRightColor = 'rgb(0, 0, 200)';
-        const plotLineWidth = 2;
-        const plotYLeftMax = slicedHistoryLeft.reduce((max, value) => Math.max(max, value), 0).toFixed(3);
-        const plotYRightMax = slicedHistoryRight.reduce((max, value) => Math.max(max, value), 0).toFixed(3);
-    
-        // Draw ticks on the vertical axes
-        const numTicks = 4;
-        for (let i = 0; i <= numTicks; i++) {
-            const tickY = plotY + plotHeight - (i / numTicks) * plotHeight;
-            const tickValueLeft = (plotYLeftMax * i / numTicks).toFixed(2);
-            const tickValueRight = (plotYRightMax * i / numTicks).toFixed(2);
-    
-            this.canvas.ctx.strokeStyle = 'rgb(0, 0, 0, 0.5)';
-            this.canvas.ctx.lineWidth = 1;
-            this.canvas.ctx.beginPath();
-            this.canvas.ctx.moveTo(plotX , tickY);
-            this.canvas.ctx.lineTo(plotX + plotWidth, tickY);
-            this.canvas.ctx.stroke();
-    
-            // Left axis ticks and labels
-            this.canvas.writeText(tickValueLeft, plotX - 2, tickY + 5, 12, plotLeftColor, 'right');
-    
-            // Right axis ticks and labels
-            this.canvas.writeText(tickValueRight, plotX + plotWidth + 2, tickY + 5, 12,plotRightColor , 'left');
-        }
-        // draw vertical to show intervals of 30 minutes
-        for (let i = 0; i <= time; i += 60*30) {
-            const x = plotX + plotWidth * i / time;
-            this.canvas.ctx.strokeStyle = 'rgb(0, 0, 0, 0.5)';
-            this.canvas.ctx.lineWidth = 1;
-            this.canvas.ctx.beginPath();
-            this.canvas.ctx.moveTo(x, plotY);
-            this.canvas.ctx.lineTo(x, plotY + plotHeight);
-            this.canvas.ctx.stroke();
-
-        }
-    
-        // Draw the plot lines
-        this.canvas.ctx.strokeStyle = plotLeftColor;
-        this.canvas.ctx.lineWidth = plotLineWidth;
-        const pathLeft = new Path2D();
-        
-        this.canvas.ctx.beginPath();
-        for (let index = 0; index < numberOfDataPoints; index++) {
-            const value = slicedHistoryLeft[index];
-            const x = plotX + plotWidth * index / numberOfDataPoints;
-            const y = plotY + plotHeight - (value / plotYLeftMax) * plotHeight;
-            if (index === 0) {
-                pathLeft.moveTo(x, y);
-            } else {
-                pathLeft.lineTo(x, y);
-            }
-        }
-        this.canvas.ctx.stroke(pathLeft);
-        
-        this.canvas.ctx.strokeStyle = plotRightColor;
-        const pathRight = new Path2D();
-        
-        this.canvas.ctx.beginPath();
-        for (let index = 0; index < numberOfDataPoints; index++) {
-            const value = slicedHistoryRight[index];
-            const x = plotX + plotWidth * index / numberOfDataPoints;
-            const y = plotY + plotHeight - (value / plotYRightMax) * plotHeight;
-            if (index === 0) {
-                pathRight.moveTo(x, y);
-            } else {
-                pathRight.lineTo(x, y);
-            }
-        }
-        this.canvas.ctx.stroke(pathRight);
-        // Draw vertical y-axis labels
-        this.canvas.ctx.save();
-        this.canvas.ctx.translate(plotX - 40, plotY + plotHeight / 2);
-        this.canvas.ctx.rotate(-Math.PI / 2);
-        this.canvas.writeText(leftLabel, 0, 0, 14,plotLeftColor , 'center');
-        this.canvas.ctx.restore();
-    
-        this.canvas.ctx.save();
-        this.canvas.ctx.translate(plotX + plotWidth + 30, plotY + plotHeight / 2);
-        this.canvas.ctx.rotate(Math.PI / 2);
-        this.canvas.writeText(rightLabel, 0, 0, 14,plotRightColor , 'center');
-        this.canvas.ctx.restore();
-    }
-
-    drawScaleBars() {
-        const scaleBarConfigs = [
-            {
-                title: 'Distance from the tip',
-                xOffset: Constants.CANVAS_WIDTH / 6-400,
-                colorFn: (i) => viridisScaleAge(i),
-                valueFn: (i) => (Constants.MINIMUM_AVAILABLE_MACROMOLECULES + (i/Constants.SCALE_BAR_SEGMENTS) * (Constants.MAXIMUM_AVAILABLE_MACROMOLECULES-Constants.MINIMUM_AVAILABLE_MACROMOLECULES)).toFixed(2),
-            },
-            {
-                title: 'Concentration',
-                xOffset: Constants.CANVAS_WIDTH / 2-400,
-                colorFn: (i) => viridisScaleATP(i),
-                valueFn: (i) => (Constants.MINIMUM_ATP_CONCENTRATION + (i/Constants.SCALE_BAR_SEGMENTS) * (Constants.MAX_ATP_CONCENTRATION-Constants.MINIMUM_ATP_CONCENTRATION)).toFixed(2),
-            },
-            {
-                title: 'Consumption',
-                xOffset: 5 * Constants.CANVAS_WIDTH / 6-400,
-                colorFn: (i) => viridisScaleConsumption(i),
-                valueFn: (i) =>  (Constants.MINIMUM_ATP_CONSUMPTION_RATE + (i/Constants.SCALE_BAR_SEGMENTS) * (Constants.MAX_ATP_CONSUMPTION_RATE-Constants.MINIMUM_ATP_CONSUMPTION_RATE)).toFixed(2),
-            }
-        ];
-
-        scaleBarConfigs.forEach(config => this.drawScaleBar(config));
-
-
-    }
-
-    drawScaleBar(config) {
-
-        for (let i = 0; i <= Constants.SCALE_BAR_SEGMENTS; i++) {
-            const x = config.xOffset ;
-            const y = Constants.SCALE_BAR_Y_OFFSET + i * Constants.SCALE_BAR_SEGMENT_LENGTH;
-            const value = config.valueFn(i);
-            const color = config.colorFn(value);
-
-            if(i === 0) {
-                this.canvas.writeText(`<${value}`, x + Constants.SCALE_BAR_SEGMENT_WIDTH +5, y + Constants.SCALE_BAR_SEGMENT_LENGTH / 2 + Constants.SCALE_BAR_TEXT_Y_OFFSET);
-            } else if (i === Constants.SCALE_BAR_SEGMENTS) {
-                this.canvas.writeText(`>${value}`, x + Constants.SCALE_BAR_SEGMENT_WIDTH +5, y + Constants.SCALE_BAR_SEGMENT_LENGTH / 2 + Constants.SCALE_BAR_TEXT_Y_OFFSET);
-            }else{
-
-            
-            this.canvas.writeText(`${value}`, x + Constants.SCALE_BAR_SEGMENT_WIDTH +5, y + Constants.SCALE_BAR_SEGMENT_LENGTH / 2 + Constants.SCALE_BAR_TEXT_Y_OFFSET);
-            }
-            this.canvas.fillRect(x, y, Constants.SCALE_BAR_SEGMENT_WIDTH, Constants.SCALE_BAR_SEGMENT_LENGTH, color);
-        }
-        const factor = 1.5;
-        this.canvas.strokeRect(config.xOffset, Constants.SCALE_BAR_Y_OFFSET, Constants.SCALE_BAR_SEGMENT_WIDTH, Constants.SCALE_BAR_SEGMENT_LENGTH * (Constants.SCALE_BAR_SEGMENTS + 1), Constants.BORDER_COLOR, 3);
-        //Let's do a bar that is 5 µm long
-        this.canvas.writeText('5 µm', config.xOffset + Constants.SCALE_BAR_SEGMENT_WIDTH+705, Constants.SCALE_BAR_Y_OFFSET + 850, 20, 'black');
-        this.canvas.fillRect(config.xOffset + Constants.SCALE_BAR_SEGMENT_WIDTH+497+200, Constants.SCALE_BAR_Y_OFFSET + 860, 10*Constants.CYTOPLASM_RADIUS*factor, 7, 'black');
-
+        // 2D plots removed — now using 3D renderer only
     }
 }
 
