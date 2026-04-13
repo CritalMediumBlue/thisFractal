@@ -8,11 +8,11 @@ export const Constants = {
    
     MINIMUM_ATP_CONCENTRATION:  (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The minimum concentration of ATP in living cells is arround 1mM per µm^3.
     MAX_ATP_CONCENTRATION: 5 * (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The maximum concentration of ATP in living cells is arround 5mM per µm^3.
-    MINIMUM_ATP_CONSUMPTION_RATE: 0.2*0.8*1.1, // millions of molecules per segment per second. This data is based on the literature. The minimum consumption rate of ATP in living cells is arround 0.15 millions of ATP molecules per second.
+    MINIMUM_ATP_CONSUMPTION_RATE: 0.2*0.8*1.5, // millions of molecules per segment per second. This data is based on the literature. The minimum consumption rate of ATP in living cells is arround 0.15 millions of ATP molecules per second.
     MAX_ATP_CONSUMPTION_RATE: 6.4*0.8, // millions of molecules per segment per second. This data is based on the literature. The maximum consumption rate of ATP in living cells is arround 5 millions of ATP molecules per second.
     MINIMUM_AVAILABLE_MACROMOLECULES: 2, // This is not based on any data, it is just a placeholder for the minimum value of available macromolecules in the cytoplasm.
     MAXIMUM_AVAILABLE_MACROMOLECULES: 4, // This is not based on any data, it is just a placeholder for the maximum value of available macromolecules in the cytoplasm.
-    ATP_PRODUCTION_RATE: 100, // Millions of Molecules per second per µm^3 of FOCI
+    ATP_PRODUCTION_RATE: 200, // Millions of Molecules per second per µm^3 of FOCI
     ATP_TO_MACROMOLECULES: 1000, // How many ATP molecules are required to produce one macromolecule
     FOCI_GROWTH_RATE: 0.01, // how much the foci grow every second
 
