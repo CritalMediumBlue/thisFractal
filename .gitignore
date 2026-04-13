@@ -1,0 +1,12 @@
+/streptomyces/node_modules/
+/streptomyces/dist/
+/streptomyces/.env
+/streptomyces/.env.*
+!/streptomyces/.env.example
+/streptomyces/npm-debug.log*
+/streptomyces/yarn-debug.log*
+/streptomyces/yarn-error.log*
+/streptomyces/pnpm-debug.log*
+
+.DS_Store
+Thumbs.db
