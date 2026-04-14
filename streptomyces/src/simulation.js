@@ -107,10 +107,25 @@ export class Simulation {
             this.particleMesh.geometry.dispose();
             this.particleMesh.material.dispose();
         }
+        if (this.tipocMesh) {
+            this.canvas.scene.remove(this.tipocMesh);
+            this.tipocMesh.geometry.dispose();
+            this.tipocMesh.material.dispose();
+        }
+        if (this.tipSegmentMesh) {
+            this.canvas.scene.remove(this.tipSegmentMesh);
+            this.tipSegmentMesh.geometry.dispose();
+            this.tipSegmentMesh.material.dispose();
+        }
+        if (this.tipIntSegmentMesh) {
+            this.canvas.scene.remove(this.tipIntSegmentMesh);
+            this.tipIntSegmentMesh.geometry.dispose();
+            this.tipIntSegmentMesh.material.dispose();
+        }
 
         // Segment spheres
-        const segGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, 8, 8, 0, Math.PI*2.0, Math.PI/3*0.9, Math.PI/3*1.1);
-        const segMat = new THREE.MeshBasicMaterial({ vertexColors: false, opacity: 0.5, transparent: true  , side: THREE.DoubleSide });
+        const segGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, 8, 2, 0, Math.PI*2.0, Math.PI/3 , Math.PI/3);
+        const segMat = new THREE.MeshBasicMaterial({ vertexColors: false,  wireframe: true });        
         this.segmentMesh = new THREE.InstancedMesh(segGeo, segMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
         this.segmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
         // Allocate instance color buffer
@@ -122,18 +137,64 @@ export class Simulation {
         this.segmentMesh.frustumCulled = false;
         this.canvas.scene.add(this.segmentMesh);
 
+
+
+        const intSegGeo = new THREE.SphereGeometry(Constants.INT_CYTOPLASM_RADIUS, 8, 2, 0, Math.PI*2.0, Math.PI/3 , Math.PI/3);
+        const intSegMat = new THREE.MeshBasicMaterial({ vertexColors: false,  wireframe: true });
+        this.intSegmentMesh = new THREE.InstancedMesh(intSegGeo, intSegMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
+        this.intSegmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        this.intSegmentMesh.instanceColor = new THREE.InstancedBufferAttribute(
+            new Float32Array(Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS * 3), 3
+        );
+        this.intSegmentMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+        this.intSegmentMesh.count = 0;
+        this.intSegmentMesh.frustumCulled = false;
+        this.canvas.scene.add(this.intSegmentMesh);
+
+        // Tip segment spheres (wider arc)
+        const tipSegGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, 10, 3, 0, Math.PI*2.0, 0, 2*Math.PI/3);
+        const tipSegMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
+        this.tipSegmentMesh = new THREE.InstancedMesh(tipSegGeo, tipSegMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
+        this.tipSegmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        this.tipSegmentMesh.instanceColor = new THREE.InstancedBufferAttribute(
+            new Float32Array(Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS * 3), 3
+        );
+        this.tipSegmentMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+        this.tipSegmentMesh.count = 0;
+        this.tipSegmentMesh.frustumCulled = false;
+        this.canvas.scene.add(this.tipSegmentMesh);
+
+        const tipIntSegGeo = new THREE.SphereGeometry(Constants.INT_CYTOPLASM_RADIUS, 10, 3, 0, Math.PI*2.0, 0 , 2*Math.PI/3);
+        const tipIntSegMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
+        this.tipIntSegmentMesh = new THREE.InstancedMesh(tipIntSegGeo, tipIntSegMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
+        this.tipIntSegmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        this.tipIntSegmentMesh.instanceColor = new THREE.InstancedBufferAttribute(
+            new Float32Array(Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS * 3), 3
+        );
+        this.tipIntSegmentMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+        this.tipIntSegmentMesh.count = 0;
+        this.tipIntSegmentMesh.frustumCulled = false;
+        this.canvas.scene.add(this.tipIntSegmentMesh);
+
         // Particle spheres (smaller, green)
         const partGeo = new THREE.SphereGeometry(Constants.FOCUS_RADIUS , 8, 8);
-        const partMat = new THREE.MeshBasicMaterial({ color: 0x66ff66,  opacity: 0.8, transparent: true  , });
+        const partMat = new THREE.MeshBasicMaterial({ color: 0x66ff66,  opacity: 0.5, transparent: true  , });
         this.particleMesh = new THREE.InstancedMesh(partGeo, partMat, MAX_PARTICLES);
         this.particleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
         this.particleMesh.count = 0;
         this.particleMesh.frustumCulled = false;
         this.canvas.scene.add(this.particleMesh);
+        
 
 
         // TIPOC spheres (red)
-        const tipocGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS * 0.5, 8, 8);
+        const tipocGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS , 20, 20, 0, Math.PI*2.0, 0 , Math.PI/3);
+        const tipocMat = new THREE.MeshBasicMaterial({ color: 0xff4444, wireframe: true });
+        this.tipocMesh = new THREE.InstancedMesh(tipocGeo, tipocMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
+        this.tipocMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        this.tipocMesh.count = 0;
+        this.tipocMesh.frustumCulled = false;
+        this.canvas.scene.add(this.tipocMesh);
     }
 
     updateSegmentToArrayIndex() {
@@ -382,10 +443,11 @@ export class Simulation {
         let Spore = new CytoplasmSegment(
             Constants.CANVAS_WIDTH / 10,
             Constants.CANVAS_HEIGHT / 18,
-            Math.PI / 2,
+           
             0,
             0,
             0,
+            Constants.TIPOC_SPLITTING_SIZE*0.95,
             4
         )
 
@@ -396,18 +458,18 @@ export class Simulation {
         Spore.branchHash = this.generateBranchHash(Spore.x, Spore.y);
         this.branches.push(Spore.branchHash);
 
-        let newX = Spore.x + Math.cos(Spore.direction) * Constants.CYTOPLASM_RADIUS;
-        let newY = Spore.y + Math.sin(Spore.direction) * Constants.CYTOPLASM_RADIUS;
+        let newX = Spore.x + Math.cos(Spore.direction- Math.PI) * Constants.CYTOPLASM_RADIUS;
+        let newY = Spore.y + Math.sin(Spore.direction- Math.PI) * Constants.CYTOPLASM_RADIUS;
 
 
 
         this.addNewCytoplasmSegment(
             newX, 
             newY, 
-            Math.PI / 2, 
+            Math.PI , 
             Spore, 
             segments,
-            0.9*Constants.TIPOC_SPLITTING_SIZE,
+            Constants.TIPOC_SPLITTING_SIZE*0.95,
             4
         );
 
@@ -616,14 +678,10 @@ export class Simulation {
 
    
     
-  /*        if (lastPoint.index % Constants.ADD_FOCI_EVERY === 0) {
+          if (lastPoint.index % Constants.ADD_FOCI_EVERY === 0) {
             this.addNewBrownianParticles(newX, newY, lastPoint);
-        }  */ 
-          // Add a foci with probability 40%
-        if (Math.random() < 0.344) {
-            this.addNewBrownianParticles(newX, newY, lastPoint);
-        } 
-
+        }   
+ 
 
 
     }
@@ -688,10 +746,9 @@ export class Simulation {
     updateBrownianParticles() {
         this.brownianParticles.forEach(particle => {
             const closestCytoplasmSegment = this.findClosestCytoplasmSegment(particle); 
-            //const closestBrownianParticle = this.findClosestBrownianParticle(particle);
-            
-            particle.updatePosition(closestCytoplasmSegment, this.time);
-           // particle.volumeExclusionInteractions(closestBrownianParticle);
+            const closestBrownianParticle = this.findClosestBrownianParticle(particle);
+
+            particle.updatePosition(closestCytoplasmSegment, closestBrownianParticle, this.time);
 /* 
             this.quadtreeBrownianParticles = Quadtree.create(this.brownianParticles);
             const closestBrownianParticle2 = this.findClosestBrownianParticle(particle);
@@ -726,7 +783,7 @@ export class Simulation {
         this.totalMacromolecules1 = this.newConcentrations.availableMacromolecules.reduce((sum, value) => sum + value, 0);
         this.averageMacromolecules = this.totalMacromolecules1 / numberOfSegments;
 
-        this.totalVolumeOfFoci = this.brownianParticles.reduce((sum, particle) => sum + (4/3)*Math.PI*(particle.size*Constants.PIXEL_TO_MICROMETER)**3, 0); 
+        this.totalVolumeOfFoci = this.brownianParticles.reduce((sum, particle) => sum + (4/3)*Math.PI*(particle.size)**3, 0); 
         //this.totalATPProductionRate1 = this.totalVolumeOfFoci*Constants.ATP_PRODUCTION_RATE*this.iterations;
 
         
@@ -758,19 +815,43 @@ export class Simulation {
 
     draw() {
         const segCount = this.numberOfCytoplasmSegments;
-        this.segmentMesh.count = segCount;
+        let regularCount = 0;
+        let tipCount = 0;
 
         for (let i = 0; i < segCount; i++) {
             const seg = this.cytoplasmSegments[i];
             _dummy.position.set(seg.x, seg.y, 0);
             _dummy.rotation.set(0, 0, seg.direction - Math.PI / 2);
+            _dummy.scale.set(1, 1, 1);
             _dummy.updateMatrix();
-            this.segmentMesh.setMatrixAt(i, _dummy.matrix);
             viridisToThreeColor(seg.ATPConcentration, _color);
-            this.segmentMesh.setColorAt(i, _color);
+
+            if (seg.tipocSize > 0) {
+                this.tipSegmentMesh.setMatrixAt(tipCount, _dummy.matrix);
+                this.tipIntSegmentMesh.setMatrixAt(tipCount, _dummy.matrix);
+                this.tipSegmentMesh.setColorAt(tipCount, _color);
+                this.tipIntSegmentMesh.setColorAt(tipCount, _color);
+                tipCount++;
+            } else {
+                this.segmentMesh.setMatrixAt(regularCount, _dummy.matrix);
+                this.intSegmentMesh.setMatrixAt(regularCount, _dummy.matrix);
+                this.segmentMesh.setColorAt(regularCount, _color);
+                this.intSegmentMesh.setColorAt(regularCount, _color);
+                regularCount++;
+            }
         }
+        this.segmentMesh.count = regularCount;
         this.segmentMesh.instanceMatrix.needsUpdate = true;
         if (this.segmentMesh.instanceColor) this.segmentMesh.instanceColor.needsUpdate = true;
+        this.intSegmentMesh.count = regularCount;
+        this.intSegmentMesh.instanceMatrix.needsUpdate = true;
+        if (this.intSegmentMesh.instanceColor) this.intSegmentMesh.instanceColor.needsUpdate = true;
+        this.tipSegmentMesh.count = tipCount;
+        this.tipSegmentMesh.instanceMatrix.needsUpdate = true;
+        if (this.tipSegmentMesh.instanceColor) this.tipSegmentMesh.instanceColor.needsUpdate = true;
+        this.tipIntSegmentMesh.count = tipCount;
+        this.tipIntSegmentMesh.instanceMatrix.needsUpdate = true;
+        if (this.tipIntSegmentMesh.instanceColor) this.tipIntSegmentMesh.instanceColor.needsUpdate = true;
 
         const partCount = Math.min(this.brownianParticles.length, MAX_PARTICLES);
         this.particleMesh.count = partCount;
@@ -779,10 +860,34 @@ export class Simulation {
             const p = this.brownianParticles[i];
             _dummy.position.set(p.x, p.y, 0);
             _dummy.rotation.set(0, 0, 0);
+            _dummy.scale.set(1, 1, 1);
             _dummy.updateMatrix();
             this.particleMesh.setMatrixAt(i, _dummy.matrix);
         }
         this.particleMesh.instanceMatrix.needsUpdate = true;
+
+        // TIPOC spheres — only for segments with tipocSize > 0
+        let tipocCount = 0;
+        for (let i = 0; i < segCount; i++) {
+            const seg = this.cytoplasmSegments[i];
+            if (seg.tipocSize > 0) {
+                //get growth direction
+                const growthDirection = seg.direction;
+                //get the rotation angle for the growth direction
+                const rotationAngle = growthDirection - Math.PI / 2; 
+                const diffX = Math.cos(growthDirection) * Constants.CYTOPLASM_RADIUS * 0.5;
+                const diffY = Math.sin(growthDirection) * Constants.CYTOPLASM_RADIUS * 0.5;
+                _dummy.position.set(seg.x , seg.y , 0);
+                _dummy.rotation.set(0, 0, rotationAngle);
+                const scale = seg.tipocSize ;
+                _dummy.scale.set(scale, scale, scale);
+                _dummy.updateMatrix();
+                this.tipocMesh.setMatrixAt(tipocCount, _dummy.matrix);
+                tipocCount++;
+            }
+        }
+        this.tipocMesh.count = tipocCount;
+        this.tipocMesh.instanceMatrix.needsUpdate = true;
 
         this.canvas.render();
     }

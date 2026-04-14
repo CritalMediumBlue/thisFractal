@@ -7,7 +7,7 @@ let BigTime = 0;
 function updateSimulation() {
     if (!stopped) {
         simulation.update(); // Advances the simulation by 1 second
-         if (simulation.time % (1*60) === 0) { // Draw every 60 simulation seconds
+         if (simulation.time % (1*20) === 0) { // Draw every 20 simulation seconds
             simulation.draw();
              if (simulation.time >= Constants.MAX_TIME-100) {
                 BigTime++;

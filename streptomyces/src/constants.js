@@ -4,26 +4,25 @@ export const Constants = {
     TIPOC_SPLITTING_SIZE:1, // Once the TIPOC reaches this size, it will asymmetrically split into two TIPOCs. Branching the hyphae in the future.
     TIPOC_GRWOTH_RATE: 1/280, // the rate at which the TIPOC consumes macromolecules and grows.
     SLOW_UPDATE: 5,
-    FOCUS_RADIUS: 2.1,
+    FOCUS_RADIUS: 200,
     //Growth rate constants
    
     MINIMUM_ATP_CONCENTRATION:  (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The minimum concentration of ATP in living cells is arround 1mM per µm^3.
     MAX_ATP_CONCENTRATION: 5 * (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The maximum concentration of ATP in living cells is arround 5mM per µm^3.
-    MINIMUM_ATP_CONSUMPTION_RATE: 0.2*0.8*1.5, // millions of molecules per segment per second. This data is based on the literature. The minimum consumption rate of ATP in living cells is arround 0.15 millions of ATP molecules per second.
+    MINIMUM_ATP_CONSUMPTION_RATE: 0.2*0.8*1.9, // millions of molecules per segment per second. This data is based on the literature. The minimum consumption rate of ATP in living cells is arround 0.15 millions of ATP molecules per second.
     MAX_ATP_CONSUMPTION_RATE: 6.4*0.8, // millions of molecules per segment per second. This data is based on the literature. The maximum consumption rate of ATP in living cells is arround 5 millions of ATP molecules per second.
     MINIMUM_AVAILABLE_MACROMOLECULES: 2, // This is not based on any data, it is just a placeholder for the minimum value of available macromolecules in the cytoplasm.
     MAXIMUM_AVAILABLE_MACROMOLECULES: 4, // This is not based on any data, it is just a placeholder for the maximum value of available macromolecules in the cytoplasm.
-    ATP_PRODUCTION_RATE: 200, // Millions of Molecules per second per µm^3 of FOCI
+    ATP_PRODUCTION_RATE: 100, // Millions of Molecules per second per µm^3 of FOCI
     ATP_TO_MACROMOLECULES: 1000, // How many ATP molecules are required to produce one macromolecule
     FOCI_GROWTH_RATE: 0.01, // how much the foci grow every second
 
     // Geometry of the hyphae
-    MICROMETER_TO_PIXEL: 10, // 1 micrometer is 10 pixels
-    PIXEL_TO_MICROMETER: 0.1, // 1 pixel is 0.1 micrometers
-    CYTOPLASM_RADIUS: 2.75, // 4 pixels mean 0.4 micrometers
+    CYTOPLASM_RADIUS: 500, // micrometers
+    INT_CYTOPLASM_RADIUS: 458, // micrometers
     CYTOPLASM_VOLUME: Math.PI/4, // µm^3
     CURVINESS: 0.35, // Higher values make the hyphae more tortuous, lower values make the hyphae more straight
-    MACROMOLECULES_REQUIRED_FOR_ELONGATION:10, // This tells us how many macromolecules have to be consumed in each cytoplasm segment for the hyphae to elongate (Add a new segment at the tip).
+    MACROMOLECULES_REQUIRED_FOR_ELONGATION:8, // This tells us how many macromolecules have to be consumed in each cytoplasm segment for the hyphae to elongate (Add a new segment at the tip).
 
     // Brownian particles (foci) constants
     ADD_FOCI_EVERY: 3,  //every 6th cytoplasm segment a green fluorescent foci is added
@@ -37,7 +36,7 @@ export const Constants = {
     DECAY:4.5,
 
     //Diffusion of Foci
-    Do:((1.38e-23*293)/(6*Math.PI*6)),
+    Do:((1.38e-23*293)/(6*Math.PI*6))*800*0.5,
 
 
 
@@ -49,18 +48,13 @@ export const Constants = {
     SCALE_BAR_SEGMENT_WIDTH: 16,
     SCALE_BAR_Y_OFFSET: 50,
     SCALE_BAR_TEXT_Y_OFFSET: 5,
-    BORDER_COLOR: 'rgb(200, 200, 200)',
     CANVAS_WIDTH: 2500  ,
     CANVAS_HEIGHT: 1400,
     MAX_NUMBER_OF_CYTOPLASM_SEGMENTS: 20000,
 
 
     //Measuring distances
-    TICK_LENGTH: 10,
-    FONT_SIZE_SMALL: 13,
-    BORDER: 5,
-    BORDER_WIDTH: 10,
-    MAX_TIME:60*60*8, // 8 hours
+    MAX_TIME:60*60*8,//60*60*8, // 8 hours
 
 
 
