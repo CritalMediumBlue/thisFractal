@@ -109,8 +109,8 @@ export class Simulation {
         }
 
         // Segment spheres
-        const segGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, 16, 16);
-        const segMat = new THREE.MeshStandardMaterial({ vertexColors: false });
+        const segGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, 8, 8, 0, Math.PI*2.0, Math.PI/3*0.9, Math.PI/3*1.1);
+        const segMat = new THREE.MeshBasicMaterial({ vertexColors: false, opacity: 0.5, transparent: true  , side: THREE.DoubleSide });
         this.segmentMesh = new THREE.InstancedMesh(segGeo, segMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
         this.segmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
         // Allocate instance color buffer
@@ -123,13 +123,17 @@ export class Simulation {
         this.canvas.scene.add(this.segmentMesh);
 
         // Particle spheres (smaller, green)
-        const partGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS * 0.4, 8, 8);
-        const partMat = new THREE.MeshStandardMaterial({ color: 0x66ff66 });
+        const partGeo = new THREE.SphereGeometry(Constants.FOCUS_RADIUS , 8, 8);
+        const partMat = new THREE.MeshBasicMaterial({ color: 0x66ff66,  opacity: 0.8, transparent: true  , });
         this.particleMesh = new THREE.InstancedMesh(partGeo, partMat, MAX_PARTICLES);
         this.particleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
         this.particleMesh.count = 0;
         this.particleMesh.frustumCulled = false;
         this.canvas.scene.add(this.particleMesh);
+
+
+        // TIPOC spheres (red)
+        const tipocGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS * 0.5, 8, 8);
     }
 
     updateSegmentToArrayIndex() {
@@ -759,6 +763,7 @@ export class Simulation {
         for (let i = 0; i < segCount; i++) {
             const seg = this.cytoplasmSegments[i];
             _dummy.position.set(seg.x, seg.y, 0);
+            _dummy.rotation.set(0, 0, seg.direction - Math.PI / 2);
             _dummy.updateMatrix();
             this.segmentMesh.setMatrixAt(i, _dummy.matrix);
             viridisToThreeColor(seg.ATPConcentration, _color);
@@ -773,6 +778,7 @@ export class Simulation {
         for (let i = 0; i < partCount; i++) {
             const p = this.brownianParticles[i];
             _dummy.position.set(p.x, p.y, 0);
+            _dummy.rotation.set(0, 0, 0);
             _dummy.updateMatrix();
             this.particleMesh.setMatrixAt(i, _dummy.matrix);
         }

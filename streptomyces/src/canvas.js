@@ -6,7 +6,7 @@ export class Canvas {
     constructor() {
         // Scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0xf0f0f0);
+        this.scene.background = new THREE.Color(0x111111);
 
         // Camera — position above the simulation starting area
         const aspect = window.innerWidth / window.innerHeight;
@@ -27,18 +27,10 @@ export class Canvas {
         // Expose domElement so existing code that reads `this.canvas.canvas` still works
         this.canvas = this.renderer.domElement;
 
-        // Lights
-        const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-        this.scene.add(ambient);
-
-        const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-        dir.position.set(cx, cy, 500);
-        this.scene.add(dir);
-
         // OrbitControls
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.target.set(cx, cy, 0);
-        this.controls.enableDamping = true;
+        this.controls.enableDamping = false;
         this.controls.update();
 
         // Resize handler

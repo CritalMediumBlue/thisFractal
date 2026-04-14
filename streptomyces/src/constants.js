@@ -4,6 +4,7 @@ export const Constants = {
     TIPOC_SPLITTING_SIZE:1, // Once the TIPOC reaches this size, it will asymmetrically split into two TIPOCs. Branching the hyphae in the future.
     TIPOC_GRWOTH_RATE: 1/280, // the rate at which the TIPOC consumes macromolecules and grows.
     SLOW_UPDATE: 5,
+    FOCUS_RADIUS: 2.1,
     //Growth rate constants
    
     MINIMUM_ATP_CONCENTRATION:  (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The minimum concentration of ATP in living cells is arround 1mM per µm^3.
@@ -19,7 +20,7 @@ export const Constants = {
     // Geometry of the hyphae
     MICROMETER_TO_PIXEL: 10, // 1 micrometer is 10 pixels
     PIXEL_TO_MICROMETER: 0.1, // 1 pixel is 0.1 micrometers
-    CYTOPLASM_RADIUS: 5, // 4 pixels mean 0.4 micrometers
+    CYTOPLASM_RADIUS: 2.75, // 4 pixels mean 0.4 micrometers
     CYTOPLASM_VOLUME: Math.PI/4, // µm^3
     CURVINESS: 0.35, // Higher values make the hyphae more tortuous, lower values make the hyphae more straight
     MACROMOLECULES_REQUIRED_FOR_ELONGATION:10, // This tells us how many macromolecules have to be consumed in each cytoplasm segment for the hyphae to elongate (Add a new segment at the tip).
