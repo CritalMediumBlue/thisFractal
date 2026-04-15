@@ -32,7 +32,7 @@ export class BrownianParticle {
 
         const [dx2, dy2] = [closestBrownianParticle.x - this.x, closestBrownianParticle.y - this.y];
         const distanceSquered2 = (dx2 * dx2 + dy2 * dy2);
-        const minDistance = Constants.FOCUS_RADIUS*6; // Minimum allowed distance between particles. This is set to 6 times the radius of the foci, so that they do not overlap too much. The factor of 6 is arbitrary and can be adjusted based on the desired level of overlap.
+        const minDistance = Constants.FOCUS_RADIUS*4; // Minimum allowed distance between particles. This is set to 8 times the radius of the foci, so that they do not overlap too much. The factor of 8 is arbitrary and can be adjusted based on the desired level of overlap.
         const minDistanceSquared = minDistance*minDistance;
 
         this.x += (Math.sqrt(normalDiffusionCoef*2*5) * this.getNormalRandom())*(10/1); //5 seconds. The 10 is to convert the micrometers to pixels
@@ -43,14 +43,14 @@ export class BrownianParticle {
             //console.log("Pushing particles apart");
             const distance2 = Math.sqrt(distanceSquered2);
             const overlap = minDistance - distance2;
+            const maxPush = limit*0.5 ; // Cap push to half the confinement radius
+            const cappedOverlap = Math.min(overlap, maxPush);
             const angle2 = Math.atan2(dy2, dx2);
-            const pushX = overlap * Math.cos(angle2);
-            const pushY = overlap * Math.sin(angle2);
+            const pushX = cappedOverlap * Math.cos(angle2);
+            const pushY = cappedOverlap * Math.sin(angle2);
 
-            this.x -= pushX/2; // Move this particle away from the closest particle
-            this.y -= pushY/2;
-            closestBrownianParticle.x += pushX/4; // Move the closest particle away from this particle
-            closestBrownianParticle.y += pushY/4;
+            this.x -= pushX; // Move only this particle by the capped overlap
+            this.y -= pushY;
           
         }
 
@@ -60,17 +60,13 @@ export class BrownianParticle {
         this.y += (Math.sqrt(normalDiffusionCoef*2*5) * this.getNormalRandom())*(10/1);
 
 
-        const [dx, dy] = [closestCytoplasmSegment.x - this.x, closestCytoplasmSegment.y - this.y];
+        const [dx, dy] = [this.x - closestCytoplasmSegment.x, this.y - closestCytoplasmSegment.y];
         const distanceSquered = (dx * dx + dy * dy);
-        //Return it to the boundary if it goes outside
+        //Clamp to boundary if it goes outside
         if (distanceSquered > limitSquered) {
-            const distance = Math.sqrt(distanceSquered);
-            const angle = Math.atan2(-dy, -dx);
-            const newRelativeX = (2*limit-distance) * Math.cos(angle);
-            const newRelativeY = (2*limit-distance) * Math.sin(angle);
-
-            this.x = closestCytoplasmSegment.x + newRelativeX;
-            this.y = closestCytoplasmSegment.y + newRelativeY;
+            const scale = limit / Math.sqrt(distanceSquered);
+            this.x = closestCytoplasmSegment.x + dx * scale;
+            this.y = closestCytoplasmSegment.y + dy * scale;
         } 
 
     
@@ -80,7 +76,7 @@ export class BrownianParticle {
         if (this.isTraced && time % 600 === 0) { //
             
 
-            this.trace.push({x: this.x, y: this.y});
+            this.trace.push({x: this.x, y: this.y, time: time});
             if (this.trace.length > Constants.MAX_TRACE_LENGTH) {
                 this.trace = this.trace.slice(500);
             } 

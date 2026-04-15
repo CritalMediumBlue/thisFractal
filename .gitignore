@@ -14,3 +14,10 @@ Thumbs.db
 
 .venv/
 input/
+
+frames/
+Spatiotemporal\ metabolism\ in\ Streptomyces/
+
+*.mp4
+*.avi
+*.mkv

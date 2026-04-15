@@ -14,7 +14,7 @@ export const Constants = {
     MINIMUM_AVAILABLE_MACROMOLECULES: 2, // This is not based on any data, it is just a placeholder for the minimum value of available macromolecules in the cytoplasm.
     MAXIMUM_AVAILABLE_MACROMOLECULES: 4, // This is not based on any data, it is just a placeholder for the maximum value of available macromolecules in the cytoplasm.
     ATP_PRODUCTION_RATE: 100, // Millions of Molecules per second per µm^3 of FOCI
-    ATP_TO_MACROMOLECULES: 1000, // How many ATP molecules are required to produce one macromolecule
+    ATP_TO_MACROMOLECULES: 2000, // How many ATP molecules are required to produce one macromolecule
     FOCI_GROWTH_RATE: 0.01, // how much the foci grow every second
 
     // Geometry of the hyphae
@@ -54,7 +54,7 @@ export const Constants = {
 
 
     //Measuring distances
-    MAX_TIME:60*60*8,//60*60*8, // 8 hours
+    MAX_TIME:60*60*4,//60*60*8, // 8 hours
 
 
 
