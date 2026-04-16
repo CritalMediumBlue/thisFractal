@@ -76,6 +76,8 @@ export class Simulation {
 
             exportTraces(this.particleManager.brownianParticles);
 
+            this.draw();
+
             const link = document.createElement('a');
             const filename = `final_simulation_${this.stats.time}.png`;
             link.href = this.canvas.renderer.domElement.toDataURL('image/png');

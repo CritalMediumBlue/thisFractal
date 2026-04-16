@@ -46,8 +46,8 @@ export class HyphaeGrowth {
             4
         );
 
-        solver.newConcentrations.availableMacromolecules[0] = 4;
-        solver.newConcentrations.availableMacromolecules[1] = 4;
+        // Initial concentrations are set via the segment constructor (macmol=4)
+        // The solver reads from segments at the start of each step()
 
         Spore.distanceFromTheTip = 0.5;
 
@@ -109,7 +109,6 @@ export class HyphaeGrowth {
                         point.distanceFromTheTip += 0.5;
                     }
                 });
-
                 this._elongateCytoplasm(lastPoint, particleManager, numberOfCytoplasmSegments);
             }
 

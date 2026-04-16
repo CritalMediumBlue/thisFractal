@@ -6,14 +6,14 @@ export const Constants = {
    
     MINIMUM_ATP_CONCENTRATION:  (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The minimum concentration of ATP in living cells is arround 1mM per µm^3.
     MAX_ATP_CONCENTRATION: 5 * (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The maximum concentration of ATP in living cells is arround 5mM per µm^3.
-    ATP_PRODUCTION_RATE: 100, // Millions of Molecules per second per µm^3 of FOCI
-    ATP_TO_MACROMOLECULES: 2000, // How many ATP molecules are required to produce one macromolecule
+    ATP_PRODUCTION_RATE: 1000, // Millions of Molecules per second per µm^3 of FOCI
+    ATP_TO_MACROMOLECULES: 200, // How many ATP molecules are required to produce one macromolecule
 
     // Geometry of the hyphae
     CYTOPLASM_RADIUS: 350, // micrometers
     INT_CYTOPLASM_RADIUS: 330, // micrometers
-    CURVINESS: 0.35, // Higher values make the hyphae more tortuous, lower values make the hyphae more straight
-    MACROMOLECULES_REQUIRED_FOR_ELONGATION:8, // This tells us how many macromolecules have to be consumed in each cytoplasm segment for the hyphae to elongate (Add a new segment at the tip).
+    CURVINESS: 0.35, // Higher values make t8he hyphae more tortuous, lower values make the hyphae more straight
+    MACROMOLECULES_REQUIRED_FOR_ELONGATION:0.1, // This tells us how many macromolecules have to be consumed in each cytoplasm segment for the hyphae to elongate (Add a new segment at the tip).
 
     // Brownian particles (foci) constants
     ADD_FOCI_EVERY: 3,  //every 6th cytoplasm segment a green fluorescent foci is added
@@ -47,16 +47,24 @@ export const Constants = {
 //Diffusion constants
 const DiffusionCoefficient= 100; // µm^2/s
 const dX = 0.5; // µm
-const dX2 = dX * dX; // µm^2    
-const maximumDimensions = 1.5; // µm
-const stabilityCriteria = dX2 / (2 * DiffusionCoefficient * maximumDimensions); // s
-const dT = 0.99 * stabilityCriteria; // s
-const numberOftimestepsPerSecond = 1 / dT; // s^-1
+const dX2 = dX * dX; // µm^2
+
+// Crank-Nicolson implicit scheme — unconditionally stable, so we can use
+// far fewer iterations than the old explicit Euler (~1212 per second).
+const CN_ITERATIONS = 10;        // number of sub-steps per simulation second
+const CN_DT = 1.0 / CN_ITERATIONS; // time step per sub-step (seconds)
+
+// The old explicit Euler scheme ran this many sub-steps per second.
+// Source/sink rates were calibrated as per-sub-step values, so we need
+// this factor to convert them to true per-second rates for the CN scheme.
+const OLD_SUBSTEPS_PER_SECOND = 1.0 / (0.99 * dX2 / (2 * DiffusionCoefficient * 1.5)); // ≈ 1212
+
 export const Diffusion = {
-    
-    CFL: DiffusionCoefficient * dT / dX2, // unitless
-    numberOftimestepsPerSecond: numberOftimestepsPerSecond, // s^-1
- 
+    DiffusionCoefficient: DiffusionCoefficient,
+    dX2: dX2,
+    CN_ITERATIONS: CN_ITERATIONS,
+    CN_DT: CN_DT,
+    OLD_SUBSTEPS_PER_SECOND: OLD_SUBSTEPS_PER_SECOND,
 }; 
    
 

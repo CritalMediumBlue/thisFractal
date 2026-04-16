@@ -7,15 +7,19 @@ await RAPIER.init();
 
 const simulation = new Simulation();
 let stopped = false;
-let BigTime = 0;
+
+
+
 function updateSimulation() {
     if (!stopped) {
-        simulation.update(); // Advances the simulation by 1 step
-       
+        simulation.update(); 
     }
-
     setTimeout(updateSimulation, 0);
 }
+
+
+
+
 
 function downloadCanvasImage(canvas, filename) {
     simulation.draw(); // Ensure the latest frame is rendered before downloading
@@ -28,20 +32,17 @@ function downloadCanvasImage(canvas, filename) {
 addEventListener('keydown', function (event) {
     if (event.key === 's') {
         stopped = !stopped;
-    }
-    else if (event.key === 'd') {
+    } else if (event.key === 'ArrowRight' && stopped) {
+        simulation.update();
+        simulation.draw();
+    } else if (event.key === 'd') {
         simulation.draw();
         const canvas = simulation.getCanvas();
         downloadCanvasImage(canvas, `simulation_${simulation.time/120}.png`);
     }
 });
 
-addEventListener('keydown', function (event) {
-    if (event.key === 'ArrowRight' && stopped) {
-        simulation.update();
-        simulation.draw();
-    }
-});
+
 
 // Continuous render loop for OrbitControls & scene display
 function renderLoop() {
@@ -51,10 +52,12 @@ function renderLoop() {
 
 
 
-// Start both loops
 updateSimulation();
 renderLoop();
 
-} // end start()
+} 
+
+
+
 
 start();

@@ -40,11 +40,15 @@ export class Statistics {
         this.time++;
 
         const numberOfSegments = sim.numberOfCytoplasmSegments;
+        const segments = sim.hyphaeGrowth.cytoplasmSegments;
 
-        this.totalATP1 = sim.solver.newConcentrations.ATPConcentration.reduce((sum, value) => sum + value, 0);
+        this.totalATP1 = 0;
+        this.totalMacromolecules1 = 0;
+        for (let i = 0; i < numberOfSegments; i++) {
+            this.totalATP1 += segments[i].ATPConcentration;
+            this.totalMacromolecules1 += segments[i].availableMacromolecules;
+        }
         this.averageATPConcentration = this.totalATP1 / numberOfSegments;
-
-        this.totalMacromolecules1 = sim.solver.newConcentrations.availableMacromolecules.reduce((sum, value) => sum + value, 0);
         this.averageMacromolecules = this.totalMacromolecules1 / numberOfSegments;
 
         this.history.lengthOfFirstBranch[this.time] = (sim.hyphaeGrowth.lengthOfFirstBranch - 1) * 0.5;
