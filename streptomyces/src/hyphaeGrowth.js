@@ -72,7 +72,7 @@ export class HyphaeGrowth {
         newSegment.addNeighbor(lastSegment);
     }
 
-    updateCytoplasmSegments(brownianParticles, particleManager, numberOfCytoplasmSegments) {
+    updateCytoplasmSegments(brownianParticles, particleManager, numberOfCytoplasmSegments, physicsWorld) {
         this.cytoplasmSegments.forEach(lastPoint => {
             if (lastPoint.tipocSize > Constants.TIPOC_SPLITTING_SIZE / 2 && lastPoint.finishedCell > Constants.MACROMOLECULES_REQUIRED_FOR_ELONGATION) {
                 // Stretching mechanism at the tip
@@ -99,6 +99,9 @@ export class HyphaeGrowth {
                         particle.x = segment.x + dxTip * scaleTip;
                         particle.y = segment.y + dyTip * scaleTip;
                     }
+
+                    // Sync displaced position to Rapier body
+                    physicsWorld.syncPosition(particle);
                 });
 
                 this.cytoplasmSegments.forEach(point => {

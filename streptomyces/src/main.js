@@ -1,15 +1,18 @@
 import { Simulation } from './simulation.js';
 import { Constants } from './constants.js';
+import { RAPIER } from './physicsWorld.js';
+
+async function start() {
+await RAPIER.init();
 
 const simulation = new Simulation();
 let stopped = false;
 let BigTime = 0;
 function updateSimulation() {
     if (!stopped) {
-        simulation.update(); // Advances the simulation by 1 second
-         if (simulation.time % (1*10) === 0) { // Draw every 20 simulation seconds
-            simulation.draw();
-             if (simulation.time >= Constants.MAX_TIME-100) {
+        simulation.update(); // Advances the simulation by 1 step
+         if (simulation.time % (1*10) === 0) { 
+             if (simulation.time >= Constants.MAX_TIME-100) { 
                 BigTime++;
                 downloadCanvasImage(simulation.getCanvas(), `final_simulation_${BigTime}.png`);
             } 
@@ -46,13 +49,16 @@ addEventListener('keydown', function (event) {
 
 // Continuous render loop for OrbitControls & scene display
 function renderLoop() {
-    simulation.canvas.render();
+    simulation.draw();
     requestAnimationFrame(renderLoop);
 }
 
-// Draw initial state so meshes are visible immediately
-simulation.draw();
+
 
 // Start both loops
 updateSimulation();
 renderLoop();
+
+} // end start()
+
+start();

@@ -17,8 +17,6 @@ export class Statistics {
         this.totalATPConsumptionRate1 = 0;
         this.totalMacromoleculesConsumptionRate1 = 0;
 
-        this.totalATPProductionRate1 = 0;
-
         this.averageATPConcentration = 0;
         this.averageMacromolecules = 0;
 
@@ -48,8 +46,6 @@ export class Statistics {
 
         this.totalMacromolecules1 = sim.solver.newConcentrations.availableMacromolecules.reduce((sum, value) => sum + value, 0);
         this.averageMacromolecules = this.totalMacromolecules1 / numberOfSegments;
-
-        this.totalVolumeOfFoci = sim.particleManager.brownianParticles.reduce((sum, particle) => sum + (4 / 3) * Math.PI * (particle.size) ** 3, 0);
 
         this.history.lengthOfFirstBranch[this.time] = (sim.hyphaeGrowth.lengthOfFirstBranch - 1) * 0.5;
 

@@ -33,10 +33,8 @@ export class ReactionDiffusionSolver {
         };
 
         this.finnishedCell = new Float64Array(N);
-        this.consumtionOfMacromoleculesInOneSecond = new Float64Array(N);
-        this.productionOfMacromoleculesInOneSecond = new Float64Array(N);
         this.consumtionOfATPInOneSecond = new Float64Array(N);
-        this.productionOfATPInOneSecond = new Float64Array(N);
+        this.consumtionOfMacromoleculesInOneSecond = new Float64Array(N);
         this.numberOfNeighbors = new Int8Array(N);
         this.neighborIndices = new Int16Array(N * 3);
 
@@ -106,9 +104,7 @@ export class ReactionDiffusionSolver {
         const segments = cytoplasmSegments;
         const finCell = this.finnishedCell;
         const consATPSec = this.consumtionOfATPInOneSecond;
-        const prodATPSec = this.productionOfATPInOneSecond;
         const consMacMolSec = this.consumtionOfMacromoleculesInOneSecond;
-        const prodMacMolSec = this.productionOfMacromoleculesInOneSecond;
         const ATPtoMacMol = Constants.ATP_TO_MACROMOLECULES;
         let totalATP2 = 0;
         let totalMacromolecules2 = 0;
@@ -151,8 +147,6 @@ export class ReactionDiffusionSolver {
                 finCell[i] += sinMacMolS[i] * oldMacMol[i];
 
                 consATPSec[i] += ATPCons;
-                prodATPSec[i] += ATPProd;
-                prodMacMolSec[i] += MacMolProd;
                 consMacMolSec[i] += MacMolCons;
 
                 newATP[i] = oldATP[i] + CFL * (sumATP - numNeighbors * oldATP[i]) + ATPProd - ATPCons;
@@ -182,8 +176,6 @@ export class ReactionDiffusionSolver {
             this.oldConcentrations.availableMacromolecules[i] = this.newConcentrations.availableMacromolecules[i];
         }
         this.consumtionOfATPInOneSecond.fill(0);
-        this.productionOfATPInOneSecond.fill(0);
         this.consumtionOfMacromoleculesInOneSecond.fill(0);
-        this.productionOfMacromoleculesInOneSecond.fill(0);
     }
 }

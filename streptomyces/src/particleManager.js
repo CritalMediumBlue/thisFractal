@@ -3,21 +3,21 @@ import { BrownianParticle } from './brownianParticle.js';
 import { Quadtree } from './quadtree.js';
 
 export class ParticleManager {
-    constructor() {
+    constructor(physicsWorld) {
         this.brownianParticles = [];
-        this.quadtreeBrownianParticles = null;
         this.quadtreeCytoplasmSegments = null;
+        this.physicsWorld = physicsWorld;
     }
 
     init(cytoplasmSegments) {
         const lastSegment = cytoplasmSegments[cytoplasmSegments.length - 2];
-        this.brownianParticles = [new BrownianParticle(lastSegment.x, lastSegment.y, lastSegment, false, Constants.MAX_FOCI_SIZE / 2)];
-        this.quadtreeBrownianParticles = Quadtree.create(this.brownianParticles);
+        const initialParticle = new BrownianParticle(lastSegment.x, lastSegment.y, lastSegment, false, Constants.MAX_FOCI_SIZE / 2);
+        this.brownianParticles = [initialParticle];
+        this.physicsWorld.addParticle(initialParticle);
         this.quadtreeCytoplasmSegments = Quadtree.create(cytoplasmSegments);
     }
 
     updateQuadtrees(cytoplasmSegments) {
-        this.quadtreeBrownianParticles = Quadtree.create(this.brownianParticles);
         this.quadtreeCytoplasmSegments = Quadtree.create(cytoplasmSegments);
     }
 
@@ -28,10 +28,54 @@ export class ParticleManager {
     }
 
     updateBrownianParticles(time) {
+        // 1. Apply Brownian impulses to each particle's Rapier body
         this.brownianParticles.forEach(particle => {
             const closestCytoplasmSegment = this.findClosestCytoplasmSegment(particle);
-            const closestBrownianParticle = this.findClosestBrownianParticle(particle);
-            particle.updatePosition(closestCytoplasmSegment, closestBrownianParticle, time);
+            particle.applyBrownianImpulse(closestCytoplasmSegment, this.physicsWorld);
+        });
+
+        // 2. Step the Rapier physics world (resolves collisions)
+        this.physicsWorld.step();
+
+        // 3. Read back positions, apply boundary clamping, record traces, grow size
+        this.brownianParticles.forEach(particle => {
+            const pos = this.physicsWorld.readPosition(particle);
+            if (pos) {
+                particle.x = pos.x;
+                particle.y = pos.y;
+            }
+
+            const closestCytoplasmSegment = particle.previousSegment;
+            particle.clampToBoundary(closestCytoplasmSegment);
+            particle.updateTraceAndGrowth(time);
+        });
+
+        // 4. Manually resolve any remaining overlaps after clamping
+        const minDist = Constants.FOCUS_RADIUS * 2; // two radii = touching
+        const minDistSq = minDist * minDist;
+        const particles = this.brownianParticles;
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[j].x - particles[i].x;
+                const dy = particles[j].y - particles[i].y;
+                const distSq = dx * dx + dy * dy;
+                if (distSq < minDistSq && distSq > 0) {
+                    const dist = Math.sqrt(distSq);
+                    const overlap = minDist - dist;
+                    const nx = dx / dist;
+                    const ny = dy / dist;
+                    // Push each particle half the overlap distance
+                    particles[i].x -= nx * overlap * 0.5;
+                    particles[i].y -= ny * overlap * 0.5;
+                    particles[j].x += nx * overlap * 0.5;
+                    particles[j].y += ny * overlap * 0.5;
+                }
+            }
+        }
+
+        // 5. Sync all final positions to Rapier
+        this.brownianParticles.forEach(particle => {
+            this.physicsWorld.syncPosition(particle);
         });
     }
 
@@ -77,44 +121,6 @@ export class ParticleManager {
         return closestCytoplasmSegment;
     }
 
-    findClosestBrownianParticle(particle) {
-        let minDistance = Constants.CYTOPLASM_RADIUS * 4;
-        let minDistanceSquared = minDistance * minDistance;
-        let closestBrownianParticle = particle.previousParticle;
-
-        let [minX, maxX, minY, maxY] = [
-            particle.x - minDistance,
-            particle.x + minDistance,
-            particle.y - minDistance,
-            particle.y + minDistance
-        ];
-
-        this.quadtreeBrownianParticles.visit((node, x1, y1, x2, y2) => {
-            if (!node.length) {
-                const d = node.data;
-                const [dx, dy] = [particle.x - d.x, particle.y - d.y];
-                const distanceSquared = dx * dx + dy * dy;
-                const dHash = d.previousSegment.branchHash;
-                const pHash = particle.previousSegment.branchHash;
-                if (distanceSquared < minDistanceSquared && d !== particle && dHash === pHash) {
-                    minDistanceSquared = distanceSquared;
-                    minDistance = Math.sqrt(distanceSquared);
-                    closestBrownianParticle = d;
-                    [minX, maxX, minY, maxY] = [
-                        particle.x - minDistance,
-                        particle.x + minDistance,
-                        particle.y - minDistance,
-                        particle.y + minDistance
-                    ];
-                }
-            }
-            return x1 > maxX || x2 < minX || y1 > maxY || y2 < minY;
-        });
-        particle.previousParticle = closestBrownianParticle;
-
-        return closestBrownianParticle;
-    }
-
     addNewBrownianParticle(cytoplasmSegments, numberOfCytoplasmSegments, lastSegment) {
         const branchHash = lastSegment.branchHash;
 
@@ -135,5 +141,6 @@ export class ParticleManager {
         );
 
         this.brownianParticles.push(newParticle);
+        this.physicsWorld.addParticle(newParticle);
     }
 }

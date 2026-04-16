@@ -6,19 +6,22 @@ import { ReactionDiffusionSolver } from './reactionDiffusion.js';
 import { Renderer } from './renderer.js';
 import { Statistics } from './statistics.js';
 import { exportSimulationData, exportTraces } from './dataExport.js';
+import { PhysicsWorld } from './physicsWorld.js';
 
 export class Simulation {
     constructor() {
         this.canvas = new Canvas();
         this.solver = new ReactionDiffusionSolver();
         this.hyphaeGrowth = new HyphaeGrowth();
-        this.particleManager = new ParticleManager();
+        this.physicsWorld = new PhysicsWorld();
+        this.particleManager = new ParticleManager(this.physicsWorld);
         this.renderer = new Renderer();
         this.stats = new Statistics();
         this.initializeProperties();
     }
 
     initializeProperties() {
+        this.physicsWorld.init();
         this.solver.init();
         this.hyphaeGrowth.init(this.solver);
         this.particleManager.init(this.hyphaeGrowth.cytoplasmSegments);
@@ -44,7 +47,8 @@ export class Simulation {
             this.hyphaeGrowth.updateCytoplasmSegments(
                 this.particleManager.brownianParticles,
                 this.particleManager,
-                this.numberOfCytoplasmSegments
+                this.numberOfCytoplasmSegments,
+                this.physicsWorld
             );
             this.particleManager.updateQuadtrees(this.hyphaeGrowth.cytoplasmSegments);
             this.numberOfCytoplasmSegments = this.hyphaeGrowth.totalLengthOfHyphae * 2 + 1;
@@ -67,8 +71,17 @@ export class Simulation {
         this.stats.record(this);
 
         if (this.stats.time > Constants.MAX_TIME || this.hyphaeGrowth.totalLengthOfHyphae * 2 >= Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS - 100) {
+            
             exportSimulationData(this.stats.history, this.stats.time);
+
             exportTraces(this.particleManager.brownianParticles);
+
+            const link = document.createElement('a');
+            const filename = `final_simulation_${this.stats.time}.png`;
+            link.href = this.canvas.renderer.domElement.toDataURL('image/png');
+            link.download = filename;
+            link.click();
+
             this.initializeProperties();
         }
     }
@@ -81,11 +94,6 @@ export class Simulation {
             this.canvas
         );
     }
-
-    drawPlots() {
-        // 2D plots removed — now using 3D renderer only
-    }
 }
-
 
 

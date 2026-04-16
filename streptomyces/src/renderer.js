@@ -104,7 +104,7 @@ export class Renderer {
                 this.tipSegmentMesh.setMatrixAt(tipCount, _dummy.matrix);
                 this.tipIntSegmentMesh.setMatrixAt(tipCount, _dummy.matrix);
                 this.tipSegmentMesh.setColorAt(tipCount, _color);
-                _color.multiplyScalar(2); // slightly darker for inner segment
+                _color.multiplyScalar(2);
                 this.tipIntSegmentMesh.setColorAt(tipCount, _color);
                 tipCount++;
             } else {
@@ -150,8 +150,8 @@ export class Renderer {
                 const growthDirection = seg.direction;
                 const rotationAngle = growthDirection - Math.PI / 2;
                 const growthDirectionVector = new THREE.Vector2(Math.cos(growthDirection), Math.sin(growthDirection));
-                const dx = growthDirectionVector.x * (Constants.INT_CYTOPLASM_RADIUS - seg.tipocSize*500);
-                const dy = growthDirectionVector.y * (Constants.INT_CYTOPLASM_RADIUS - seg.tipocSize*500);
+                const dx = growthDirectionVector.x * (Constants.INT_CYTOPLASM_RADIUS - seg.tipocSize*330);
+                const dy = growthDirectionVector.y * (Constants.INT_CYTOPLASM_RADIUS - seg.tipocSize*330);
                 _dummy.position.set(seg.x + dx, seg.y + dy, 0);
                 _dummy.rotation.set(0, 0, rotationAngle);
                 const scale = seg.tipocSize;
