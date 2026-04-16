@@ -10,13 +10,14 @@ export const Constants = {
     ATP_TO_MACROMOLECULES: 200, // How many ATP molecules are required to produce one macromolecule
 
     // Geometry of the hyphae
-    CYTOPLASM_RADIUS: 350, // micrometers
-    INT_CYTOPLASM_RADIUS: 330, // micrometers
+    SEGMENT_SPACING: 350, // nm — real-world distance between cytoplasm segment centers
+    CYTOPLASM_RADIUS: 350, // nanometers 
+    INT_CYTOPLASM_RADIUS: 310, // nanometers
     CURVINESS: 0.35, // Higher values make t8he hyphae more tortuous, lower values make the hyphae more straight
     MACROMOLECULES_REQUIRED_FOR_ELONGATION:0.1, // This tells us how many macromolecules have to be consumed in each cytoplasm segment for the hyphae to elongate (Add a new segment at the tip).
 
     // Brownian particles (foci) constants
-    ADD_FOCI_EVERY: 3,  //every 6th cytoplasm segment a green fluorescent foci is added
+    ADD_FOCI_EVERY: 3,  //every 3th cytoplasm segment a green fluorescent foci is added
     INIT_FOCI_SIZE: 0.0066, // micrometers
     MAX_FOCI_SIZE: 0.0068,  // micrometers
     TRACE_EVERY_NTH_PARTICLE: 1, // to add a trace and follow the movement of the particles (foci).
@@ -46,7 +47,7 @@ export const Constants = {
 
 //Diffusion constants
 const DiffusionCoefficient= 100; // µm^2/s
-const dX = 0.5; // µm
+const dX = Constants.SEGMENT_SPACING / 1000; // convert nm to µm for diffusion
 const dX2 = dX * dX; // µm^2
 
 // Crank-Nicolson implicit scheme — unconditionally stable, so we can use

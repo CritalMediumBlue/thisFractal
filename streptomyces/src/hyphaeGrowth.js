@@ -33,8 +33,8 @@ export class HyphaeGrowth {
         Spore.branchHash = this._generateBranchHash(Spore.x, Spore.y);
         this.branches.push(Spore.branchHash);
 
-        let newX = Spore.x + Math.cos(Spore.direction - Math.PI) * Constants.CYTOPLASM_RADIUS;
-        let newY = Spore.y + Math.sin(Spore.direction - Math.PI) * Constants.CYTOPLASM_RADIUS;
+        let newX = Spore.x + Math.cos(Spore.direction - Math.PI) * Constants.SEGMENT_SPACING;
+        let newY = Spore.y + Math.sin(Spore.direction - Math.PI) * Constants.SEGMENT_SPACING;
 
         this._addNewCytoplasmSegment(
             newX,
@@ -49,7 +49,7 @@ export class HyphaeGrowth {
         // Initial concentrations are set via the segment constructor (macmol=4)
         // The solver reads from segments at the start of each step()
 
-        Spore.distanceFromTheTip = 0.5;
+        Spore.distanceFromTheTip = Constants.SEGMENT_SPACING / 1000;
 
         this.lengthOfFirstBranch = 2;
 
@@ -58,7 +58,7 @@ export class HyphaeGrowth {
 
     _addNewCytoplasmSegment(x, y, direction, lastSegment, segments, tipocsize, macmol) {
         let newIndex = lastSegment.index + 1;
-        this.totalLengthOfHyphae += 0.5;
+        this.totalLengthOfHyphae += Constants.SEGMENT_SPACING / 1000;
 
         const newSegment = new CytoplasmSegment(x, y, direction, newIndex, 0, tipocsize, macmol);
         segments.push(newSegment);
@@ -106,7 +106,7 @@ export class HyphaeGrowth {
 
                 this.cytoplasmSegments.forEach(point => {
                     if (point.branchHash === lastPoint.branchHash) {
-                        point.distanceFromTheTip += 0.5;
+                        point.distanceFromTheTip += Constants.SEGMENT_SPACING / 1000;
                     }
                 });
                 this._elongateCytoplasm(lastPoint, particleManager, numberOfCytoplasmSegments);
@@ -120,8 +120,8 @@ export class HyphaeGrowth {
 
     _elongateCytoplasm(lastPoint, particleManager, numberOfCytoplasmSegments) {
         const [newX, newY] = [
-            lastPoint.x + Math.cos(lastPoint.direction) * Constants.CYTOPLASM_RADIUS,
-            lastPoint.y + Math.sin(lastPoint.direction) * Constants.CYTOPLASM_RADIUS
+            lastPoint.x + Math.cos(lastPoint.direction) * Constants.SEGMENT_SPACING,
+            lastPoint.y + Math.sin(lastPoint.direction) * Constants.SEGMENT_SPACING
         ];
         const newDirection = lastPoint.direction + (Math.random() - 0.5) * Constants.CURVINESS;
         if (lastPoint.tipocSize >= Constants.TIPOC_SPLITTING_SIZE) {
