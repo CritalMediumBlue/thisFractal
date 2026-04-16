@@ -11,18 +11,14 @@ let BigTime = 0;
 function updateSimulation() {
     if (!stopped) {
         simulation.update(); // Advances the simulation by 1 step
-         if (simulation.time % (1*10) === 0) { 
-             if (simulation.time >= Constants.MAX_TIME-100) { 
-                BigTime++;
-                downloadCanvasImage(simulation.getCanvas(), `final_simulation_${BigTime}.png`);
-            } 
-        } 
+       
     }
 
     setTimeout(updateSimulation, 0);
 }
 
 function downloadCanvasImage(canvas, filename) {
+    simulation.draw(); // Ensure the latest frame is rendered before downloading
     const link = document.createElement('a');
     link.href = canvas.toDataURL('image/png');
     link.download = filename;
