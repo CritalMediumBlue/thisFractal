@@ -80,9 +80,9 @@ export class ReactionDiffusionSolver {
                 for (let j = 0; j < numberOfFoci; j++) {
                     source += Constants.ATP_PRODUCTION_RATE * (foci[j].size) ** 2;
                 }
-                this.sources.ATPConcentration[i] = 0.001 * OLD_SUBSTEPS; //source * OLD_SUBSTEPS;
+                this.sources.ATPConcentration[i] = Constants.ATP_PRODUCTION_RATE* OLD_SUBSTEPS; //source * OLD_SUBSTEPS;
             } else {
-                this.sources.ATPConcentration[i] = 0.001 * OLD_SUBSTEPS;
+                this.sources.ATPConcentration[i] = Constants.ATP_PRODUCTION_RATE* OLD_SUBSTEPS;
             }
 
             this.sinks.availableMacromolecules_S[i] = 2.5 * (0.0000001 * segment.tipocSize) * OLD_SUBSTEPS;

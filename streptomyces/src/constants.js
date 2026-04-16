@@ -6,7 +6,7 @@ export const Constants = {
    
     MINIMUM_ATP_CONCENTRATION:  (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The minimum concentration of ATP in living cells is arround 1mM per µm^3.
     MAX_ATP_CONCENTRATION: 5 * (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The maximum concentration of ATP in living cells is arround 5mM per µm^3.
-    ATP_PRODUCTION_RATE: 1000, // Millions of Molecules per second per µm^3 of FOCI
+    ATP_PRODUCTION_RATE: 0.001, // Millions of Molecules per second per µm^3 of FOCI
     ATP_TO_MACROMOLECULES: 200, // How many ATP molecules are required to produce one macromolecule
 
     // Geometry of the hyphae
@@ -14,10 +14,10 @@ export const Constants = {
     CYTOPLASM_RADIUS: 350, // nanometers 
     INT_CYTOPLASM_RADIUS: 310, // nanometers
     CURVINESS: 0.35, // Higher values make t8he hyphae more tortuous, lower values make the hyphae more straight
-    MACROMOLECULES_REQUIRED_FOR_ELONGATION:0.1, // This tells us how many macromolecules have to be consumed in each cytoplasm segment for the hyphae to elongate (Add a new segment at the tip).
+    MACROMOLECULES_REQUIRED_FOR_ELONGATION:0.5, // This tells us how many macromolecules have to be consumed in each cytoplasm segment for the hyphae to elongate (Add a new segment at the tip).
 
     // Brownian particles (foci) constants
-    ADD_FOCI_EVERY: 3,  //every 3th cytoplasm segment a green fluorescent foci is added
+    ADD_FOCI_EVERY: 2,  //every 2th cytoplasm segment a green fluorescent foci is added
     INIT_FOCI_SIZE: 0.0066, // micrometers
     MAX_FOCI_SIZE: 0.0068,  // micrometers
     TRACE_EVERY_NTH_PARTICLE: 1, // to add a trace and follow the movement of the particles (foci).
