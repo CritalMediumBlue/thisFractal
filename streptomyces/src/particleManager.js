@@ -50,28 +50,7 @@ export class ParticleManager {
             particle.updateTraceAndGrowth(time);
         });
 
-        // 4. Manually resolve any remaining overlaps after clamping
-        const minDist = Constants.FOCUS_RADIUS * 2; // two radii = touching
-        const minDistSq = minDist * minDist;
-        const particles = this.brownianParticles;
-        for (let i = 0; i < particles.length; i++) {
-            for (let j = i + 1; j < particles.length; j++) {
-                const dx = particles[j].x - particles[i].x;
-                const dy = particles[j].y - particles[i].y;
-                const distSq = dx * dx + dy * dy;
-                if (distSq < minDistSq && distSq > 0) {
-                    const dist = Math.sqrt(distSq);
-                    const overlap = minDist - dist;
-                    const nx = dx / dist;
-                    const ny = dy / dist;
-                    // Push each particle half the overlap distance
-                    particles[i].x -= nx * overlap * 0.5;
-                    particles[i].y -= ny * overlap * 0.5;
-                    particles[j].x += nx * overlap * 0.5;
-                    particles[j].y += ny * overlap * 0.5;
-                }
-            }
-        }
+
 
         // 5. Sync all final positions to Rapier
         this.brownianParticles.forEach(particle => {

@@ -25,7 +25,7 @@ export class BrownianParticle {
         const normalDiffusionCoef = Do*Df; // µm^2/s
 
         // Two independent Brownian kicks (matching the original two displacement steps)
-        const step = Math.sqrt(normalDiffusionCoef*2*5) * (10/1); // 5 seconds, 10 px/µm
+        const step = Math.sqrt(normalDiffusionCoef*2*5);
         const dx = (step * this.getNormalRandom() + step * this.getNormalRandom());
         const dy = (step * this.getNormalRandom() + step * this.getNormalRandom());
 

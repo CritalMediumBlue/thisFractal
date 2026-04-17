@@ -23,7 +23,7 @@ export class Renderer {
         this._disposeMeshes(scene);
 
         // Segment spheres
-        const segGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, 15, 2, 0, Math.PI * 2.0, Math.PI / 3, Math.PI / 3);
+        const segGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, Constants.WIDTH_SEGMENTS, Constants.HEIGHT_SEGMENTS, 0, Math.PI * 2.0, Constants.THETA_START, Constants.THETA_LENGTH);
         const segMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
         this.segmentMesh = new THREE.InstancedMesh(segGeo, segMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
         this.segmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -35,7 +35,7 @@ export class Renderer {
         this.segmentMesh.frustumCulled = false;
         scene.add(this.segmentMesh);
 
-        const intSegGeo = new THREE.SphereGeometry(Constants.INT_CYTOPLASM_RADIUS, 15, 2, 0, Math.PI * 2.0, Math.PI / 3, Math.PI / 3);
+        const intSegGeo = new THREE.SphereGeometry(Constants.INT_CYTOPLASM_RADIUS, Constants.WIDTH_SEGMENTS, Constants.HEIGHT_SEGMENTS, 0, Math.PI * 2.0, Constants.THETA_START, Constants.THETA_LENGTH);
         const intSegMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
         this.intSegmentMesh = new THREE.InstancedMesh(intSegGeo, intSegMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
         this.intSegmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -48,7 +48,7 @@ export class Renderer {
         scene.add(this.intSegmentMesh);
 
         // Tip segment spheres (wider arc)
-        const tipSegGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, 10, 3, 0, Math.PI * 2.0, 0, 2 * Math.PI / 3);
+        const tipSegGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, Constants.WIDTH_SEGMENTS_TIP, Constants.HEIGHT_SEGMENTS_TIP, 0, Math.PI * 2.0, 0, 2 * Math.PI / 3);
         const tipSegMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
         this.tipSegmentMesh = new THREE.InstancedMesh(tipSegGeo, tipSegMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
         this.tipSegmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -60,7 +60,7 @@ export class Renderer {
         this.tipSegmentMesh.frustumCulled = false;
         scene.add(this.tipSegmentMesh);
 
-        const tipIntSegGeo = new THREE.SphereGeometry(Constants.INT_CYTOPLASM_RADIUS, 10, 3, 0, Math.PI * 2.0, 0, 2 * Math.PI / 3);
+        const tipIntSegGeo = new THREE.SphereGeometry(Constants.INT_CYTOPLASM_RADIUS, Constants.WIDTH_SEGMENTS_TIP, Constants.HEIGHT_SEGMENTS_TIP, 0, Math.PI * 2.0, 0, 2 * Math.PI / 3);
         const tipIntSegMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
         this.tipIntSegmentMesh = new THREE.InstancedMesh(tipIntSegGeo, tipIntSegMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
         this.tipIntSegmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -73,7 +73,7 @@ export class Renderer {
         scene.add(this.tipIntSegmentMesh);
 
         // Particle spheres (smaller, green)
-        const partGeo = new THREE.SphereGeometry(Constants.FOCUS_RADIUS, 8, 8);
+        const partGeo = new THREE.SphereGeometry(Constants.FOCUS_RADIUS, 6, 6);
         const partMat = new THREE.MeshBasicMaterial({ color: 0x66ff66, opacity: 0.5, transparent: true });
         this.particleMesh = new THREE.InstancedMesh(partGeo, partMat, MAX_PARTICLES);
         this.particleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);

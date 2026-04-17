@@ -19,8 +19,8 @@ export class HyphaeGrowth {
 
     _initializeCytoplasmSegments(solver) {
         let Spore = new CytoplasmSegment(
-            Constants.CANVAS_WIDTH / 10,
-            Constants.CANVAS_HEIGHT / 18,
+            0,
+            0,
             0,
             0,
             0,
@@ -79,7 +79,7 @@ export class HyphaeGrowth {
                 brownianParticles.forEach(particle => {
                     const segment = particle.previousSegment;
                     const disp = Constants.DISPLACEMENT;
-                    const displacement = (1 / ((segment.distanceFromTheTip / disp) + 1)) * (Constants.CYTOPLASM_RADIUS);
+                    const displacement = (1 / ((segment.distanceFromTheTip / disp) + 1)) * (Constants.SEGMENT_SPACING);
 
                     if (segment.originalBranchHash === lastPoint.branchHash) {
                         particle.x += Math.cos(segment.originalDirection) * displacement;
@@ -113,7 +113,7 @@ export class HyphaeGrowth {
             }
 
             if (lastPoint.tipocSize > 0 && lastPoint.tipocSize < Constants.TIPOC_SPLITTING_SIZE) {
-                lastPoint.tipocSize += 0.00002 * Constants.SLOW_UPDATE * lastPoint.availableMacromolecules;
+                lastPoint.tipocSize += Constants.TIPOC_GROWTH_RATE * lastPoint.availableMacromolecules;
             }
         });
     }

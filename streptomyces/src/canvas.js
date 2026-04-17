@@ -15,8 +15,8 @@ export class Canvas {
         this.scene.fog = this.fog;
 
         // Spore starts near (250, 78); hyphae grow outward from there
-        const cx = Constants.CANVAS_WIDTH / 10;
-        const cy = Constants.CANVAS_HEIGHT / 18;
+        const cx = 0;
+        const cy = 0;
         this.camera.position.set(cx, cy, 10000);
         this.camera.lookAt(cx, cy, 0);
 

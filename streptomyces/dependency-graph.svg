@@ -27,16 +27,16 @@
 <g id="node2" class="node">
 <title>src/constants.js</title>
 <g id="a_node2"><a xlink:href="src/constants.js" xlink:title="constants.js">
-<path fill="#ffffcc" stroke="black" d="M476,-158C476,-158 417,-158 417,-158 414,-158 411,-155 411,-152 411,-152 411,-146 411,-146 411,-143 414,-140 417,-140 417,-140 476,-140 476,-140 479,-140 482,-143 482,-146 482,-146 482,-152 482,-152 482,-155 479,-158 476,-158"/>
-<text text-anchor="start" x="419" y="-146.8" font-family="Helvetica,sans-Serif" font-size="9.00">constants.js</text>
+<path fill="#ffffcc" stroke="black" d="M476,-147C476,-147 417,-147 417,-147 414,-147 411,-144 411,-141 411,-141 411,-135 411,-135 411,-132 414,-129 417,-129 417,-129 476,-129 476,-129 479,-129 482,-132 482,-135 482,-135 482,-141 482,-141 482,-144 479,-147 476,-147"/>
+<text text-anchor="start" x="419" y="-135.8" font-family="Helvetica,sans-Serif" font-size="9.00">constants.js</text>
 </a>
 </g>
 </g>
 <!-- src/brownianParticle.js&#45;&gt;src/constants.js -->
 <g id="edge1" class="edge">
 <title>src/brownianParticle.js&#45;&gt;src/constants.js</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M384.4,-136.01C391.15,-137.45 398.12,-138.93 404.83,-140.36"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="404.61,-142.45 410.91,-141.65 405.48,-138.35 404.61,-142.45"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M391.63,-132.27C396.02,-132.74 400.43,-133.21 404.74,-133.67"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="404.77,-135.78 410.96,-134.33 405.21,-131.61 404.77,-135.78"/>
 </g>
 <!-- src/canvas.js -->
 <g id="node3" class="node">
@@ -50,8 +50,8 @@
 <!-- src/canvas.js&#45;&gt;src/constants.js -->
 <g id="edge2" class="edge">
 <title>src/canvas.js&#45;&gt;src/constants.js</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M370.11,-57.86C379.68,-60.55 389.98,-64.68 398,-71 419.07,-87.61 433.04,-116.34 440.09,-133.91"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="438.26,-134.99 442.37,-139.84 442.18,-133.48 438.26,-134.99"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M370.15,-58.26C379.62,-60.98 389.85,-65.02 398,-71 416.68,-84.69 430.78,-107.98 438.59,-123.18"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="436.81,-124.32 441.36,-128.76 440.57,-122.45 436.81,-124.32"/>
 </g>
 <!-- src/colorScales.js -->
 <g id="node4" class="node">
@@ -65,8 +65,8 @@
 <!-- src/colorScales.js&#45;&gt;src/constants.js -->
 <g id="edge3" class="edge">
 <title>src/colorScales.js&#45;&gt;src/constants.js</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M379.67,-251.4C386.27,-248.86 392.7,-245.49 398,-241 422.26,-220.46 435.67,-184.39 441.64,-164.05"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="443.73,-164.38 443.33,-158.04 439.69,-163.25 443.73,-164.38"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M379.54,-251.7C386.23,-249.13 392.73,-245.67 398,-241 424.7,-217.35 437.4,-175.61 442.54,-153.21"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="444.63,-153.49 443.85,-147.18 440.52,-152.6 444.63,-153.49"/>
 </g>
 <!-- src/cytoplasmSegment.js -->
 <g id="node5" class="node">
@@ -98,8 +98,8 @@
 <!-- src/hyphaeGrowth.js&#45;&gt;src/constants.js -->
 <g id="edge4" class="edge">
 <title>src/hyphaeGrowth.js&#45;&gt;src/constants.js</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M259.74,-103.96C263.7,-102.29 267.54,-100.32 271,-98 278.61,-92.9 275.73,-85.94 284,-82 306.87,-71.11 375.49,-70.37 398,-82 419.02,-92.87 432.75,-117.8 439.81,-134"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="438.03,-135.2 442.27,-139.93 441.91,-133.59 438.03,-135.2"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M259.74,-103.96C263.7,-102.29 267.54,-100.32 271,-98 278.61,-92.9 275.73,-85.94 284,-82 306.87,-71.11 375.01,-71.35 398,-82 416.22,-90.44 430,-109.69 437.91,-123.26"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="436.17,-124.46 440.93,-128.67 439.84,-122.41 436.17,-124.46"/>
 </g>
 <!-- src/hyphaeGrowth.js&#45;&gt;src/cytoplasmSegment.js -->
 <g id="edge5" class="edge">
@@ -149,35 +149,35 @@
 <!-- src/physicsWorld.js&#45;&gt;src/constants.js -->
 <g id="edge11" class="edge">
 <title>src/physicsWorld.js&#45;&gt;src/constants.js</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M250.97,-15.95C288.82,-6.47 354.28,3.26 398,-27 433.49,-51.56 442.47,-106.82 444.73,-133.72"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="442.65,-134.07 445.18,-139.91 446.84,-133.77 442.65,-134.07"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M251.8,-15.94C289.63,-6.78 354.17,2.27 398,-27 430.48,-48.7 440.84,-97.62 444.08,-122.64"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="442.01,-123.02 444.79,-128.74 446.18,-122.53 442.01,-123.02"/>
 </g>
 <!-- src/simulation.js&#45;&gt;src/constants.js -->
-<g id="edge18" class="edge">
+<g id="edge17" class="edge">
 <title>src/simulation.js&#45;&gt;src/constants.js</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M127.19,-88.75C135.61,-77.91 151.13,-60.37 169,-52 210.34,-32.64 225.77,-46.14 271,-40 326.94,-32.41 350.88,-6.91 398,-38 430.6,-59.51 440.91,-108.52 444.11,-133.6"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="442.04,-133.99 444.8,-139.71 446.21,-133.51 442.04,-133.99"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M127.19,-88.75C135.61,-77.91 151.13,-60.37 169,-52 210.34,-32.64 225.77,-46.14 271,-40 326.94,-32.41 350.28,-7.84 398,-38 427.72,-56.79 439.22,-99.79 443.36,-122.81"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="441.34,-123.42 444.39,-128.99 445.48,-122.73 441.34,-123.42"/>
 </g>
 <!-- src/simulation.js&#45;&gt;src/canvas.js -->
-<g id="edge17" class="edge">
+<g id="edge16" class="edge">
 <title>src/simulation.js&#45;&gt;src/canvas.js</title>
 <path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M131.69,-88.95C141.06,-81.92 155.09,-72.62 169,-68 214.53,-52.88 270.42,-50.84 305.63,-51.41"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="305.91,-53.52 311.96,-51.55 306,-49.32 305.91,-53.52"/>
 </g>
 <!-- src/simulation.js&#45;&gt;src/dataExport.js -->
-<g id="edge19" class="edge">
+<g id="edge18" class="edge">
 <title>src/simulation.js&#45;&gt;src/dataExport.js</title>
 <path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M156.06,-92.58C162.39,-91.62 169.05,-90.61 175.56,-89.61"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="175.88,-91.69 181.5,-88.71 175.25,-87.54 175.88,-91.69"/>
 </g>
 <!-- src/simulation.js&#45;&gt;src/hyphaeGrowth.js -->
-<g id="edge20" class="edge">
+<g id="edge19" class="edge">
 <title>src/simulation.js&#45;&gt;src/hyphaeGrowth.js</title>
 <path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M156.06,-103.42C159.75,-103.98 163.55,-104.56 167.37,-105.14"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="167.12,-107.22 173.37,-106.05 167.76,-103.07 167.12,-107.22"/>
 </g>
 <!-- src/simulation.js&#45;&gt;src/physicsWorld.js -->
-<g id="edge22" class="edge">
+<g id="edge21" class="edge">
 <title>src/simulation.js&#45;&gt;src/physicsWorld.js</title>
 <path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M126.32,-88.93C134.49,-76.87 150.47,-55.59 169,-43 172.62,-40.54 176.62,-38.37 180.72,-36.48"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="181.68,-38.35 186.37,-34.05 180.03,-34.49 181.68,-38.35"/>
@@ -192,7 +192,7 @@
 </g>
 </g>
 <!-- src/simulation.js&#45;&gt;src/particleManager.js -->
-<g id="edge21" class="edge">
+<g id="edge20" class="edge">
 <title>src/simulation.js&#45;&gt;src/particleManager.js</title>
 <path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M133.66,-107.18C143.18,-113.57 156.52,-121.97 169,-128 174,-130.42 179.42,-132.69 184.78,-134.76"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="184.19,-136.78 190.55,-136.92 185.66,-132.85 184.19,-136.78"/>
@@ -207,7 +207,7 @@
 </g>
 </g>
 <!-- src/simulation.js&#45;&gt;src/reactionDiffusion.js -->
-<g id="edge23" class="edge">
+<g id="edge22" class="edge">
 <title>src/simulation.js&#45;&gt;src/reactionDiffusion.js</title>
 <path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M126.22,-107.36C134.52,-120.42 150.89,-144.4 169,-161 177.26,-168.57 187.51,-175.48 196.58,-180.92"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="195.52,-182.74 201.76,-183.95 197.65,-179.11 195.52,-182.74"/>
@@ -222,7 +222,7 @@
 </g>
 </g>
 <!-- src/simulation.js&#45;&gt;src/renderer.js -->
-<g id="edge24" class="edge">
+<g id="edge23" class="edge">
 <title>src/simulation.js&#45;&gt;src/renderer.js</title>
 <path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M122.45,-107.02C127.22,-127.26 141.16,-176.9 169,-208 175.2,-214.92 183.46,-220.64 191.48,-225.1"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="190.67,-227.05 196.96,-228 192.63,-223.34 190.67,-227.05"/>
@@ -237,7 +237,7 @@
 </g>
 </g>
 <!-- src/simulation.js&#45;&gt;src/statistics.js -->
-<g id="edge25" class="edge">
+<g id="edge24" class="edge">
 <title>src/simulation.js&#45;&gt;src/statistics.js</title>
 <path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M120.42,-107.29C120.73,-134.12 125.51,-212.33 169,-252 205.07,-284.89 263.24,-291.07 301.55,-291.11"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="302.01,-293.21 307.99,-291.06 301.97,-289.01 302.01,-293.21"/>
@@ -251,8 +251,8 @@
 <!-- src/particleManager.js&#45;&gt;src/constants.js -->
 <g id="edge9" class="edge">
 <title>src/particleManager.js&#45;&gt;src/constants.js</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M269.16,-146.64C309.47,-147.18 366.37,-147.94 404.53,-148.45"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="404.93,-150.56 410.96,-148.54 404.99,-146.36 404.93,-150.56"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M269.11,-145.71C304.72,-145.3 354.42,-144.33 398,-142 400.2,-141.88 402.45,-141.75 404.72,-141.6"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="404.92,-143.69 410.75,-141.17 404.62,-139.5 404.92,-143.69"/>
 </g>
 <!-- src/quadtree.js -->
 <g id="node12" class="node">
@@ -269,17 +269,11 @@
 <path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M263.96,-155.03C275.98,-157.55 288.98,-160.28 300.77,-162.76"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="300.51,-164.85 306.81,-164.03 301.37,-160.74 300.51,-164.85"/>
 </g>
-<!-- src/quadtree.js&#45;&gt;src/constants.js -->
-<g id="edge12" class="edge">
-<title>src/quadtree.js&#45;&gt;src/constants.js</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M375.03,-163.98C384.54,-161.96 395.02,-159.73 404.92,-157.63"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="405.57,-159.64 411,-156.33 404.69,-155.53 405.57,-159.64"/>
-</g>
 <!-- src/reactionDiffusion.js&#45;&gt;src/constants.js -->
-<g id="edge13" class="edge">
+<g id="edge12" class="edge">
 <title>src/reactionDiffusion.js&#45;&gt;src/constants.js</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M271.04,-194.41C315.06,-195.03 375.54,-194.21 398,-186 411.25,-181.15 423.74,-171.13 432.58,-162.74"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="434.3,-163.99 437.1,-158.28 431.35,-161 434.3,-163.99"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M271.3,-195.07C315.51,-196.15 376.12,-195.64 398,-186 414.19,-178.87 427.8,-163.47 436.24,-152.02"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="437.98,-153.19 439.75,-147.09 434.56,-150.76 437.98,-153.19"/>
 </g>
 <!-- src/thomas.js -->
 <g id="node14" class="node">
@@ -291,28 +285,28 @@
 </g>
 </g>
 <!-- src/reactionDiffusion.js&#45;&gt;src/thomas.js -->
-<g id="edge14" class="edge">
+<g id="edge13" class="edge">
 <title>src/reactionDiffusion.js&#45;&gt;src/thomas.js</title>
 <path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M269.75,-202.01C281.55,-204.19 293.94,-206.49 304.97,-208.52"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="304.67,-210.6 310.95,-209.63 305.43,-206.47 304.67,-210.6"/>
 </g>
 <!-- src/renderer.js&#45;&gt;src/constants.js -->
-<g id="edge16" class="edge">
+<g id="edge15" class="edge">
 <title>src/renderer.js&#45;&gt;src/constants.js</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M252.63,-239.3C296.83,-241.92 374.33,-244.19 398,-230 422.37,-215.39 435.58,-183.13 441.52,-164.02"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="443.59,-164.44 443.26,-158.09 439.56,-163.25 443.59,-164.44"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M252.73,-239.47C297.06,-242.3 374.72,-244.82 398,-230 425.21,-212.68 437.61,-174.44 442.6,-153.12"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="444.69,-153.39 443.91,-147.08 440.58,-152.5 444.69,-153.39"/>
 </g>
 <!-- src/renderer.js&#45;&gt;src/colorScales.js -->
-<g id="edge15" class="edge">
+<g id="edge14" class="edge">
 <title>src/renderer.js&#45;&gt;src/colorScales.js</title>
 <path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M252.58,-242.84C265.95,-245.31 281.76,-248.23 296.23,-250.91"/>
 <polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="296.06,-253.01 302.34,-252.04 296.83,-248.88 296.06,-253.01"/>
 </g>
 <!-- src/statistics.js&#45;&gt;src/constants.js -->
-<g id="edge26" class="edge">
+<g id="edge25" class="edge">
 <title>src/statistics.js&#45;&gt;src/constants.js</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M374.21,-285.77C382.76,-283.57 391.43,-279.94 398,-274 430.56,-244.59 440.93,-190.48 444.13,-164.17"/>
-<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="446.23,-164.3 444.8,-158.11 442.06,-163.84 446.23,-164.3"/>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" d="M374.02,-285.96C382.67,-283.76 391.43,-280.09 398,-274 433.13,-241.39 442.28,-181.39 444.66,-153.28"/>
+<polygon fill="#000000" fill-opacity="0.200000" stroke="#000000" stroke-width="2" stroke-opacity="0.200000" points="446.77,-153.31 445.12,-147.17 442.58,-153 446.77,-153.31"/>
 </g>
 </g>
 </svg>

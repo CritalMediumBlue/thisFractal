@@ -28,10 +28,10 @@ export class PhysicsWorld {
         const rigidBody = this.world.createRigidBody(rigidBodyDesc);
         rigidBody.lockRotations(true, true);
 
-        const colliderDesc = RAPIER.ColliderDesc.ball(Constants.FOCUS_RADIUS*8)
-            .setRestitution(0.5)
+        const colliderDesc = RAPIER.ColliderDesc.ball(Constants.FOCUS_RADIUS)
+            .setRestitution(1)
             .setFriction(0.0)
-            .setMass(1.0);
+            .setMass(2);
         const collider = this.world.createCollider(colliderDesc, rigidBody);
 
         this.particleBodies.set(particle, rigidBody);

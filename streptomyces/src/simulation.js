@@ -40,7 +40,6 @@ export class Simulation {
 
     update() {
         const spacingMicrons = Constants.SEGMENT_SPACING / 1000;
-        if (this.stats.time % Constants.SLOW_UPDATE === 0) {
             this.numberOfCytoplasmSegments = Math.round(this.hyphaeGrowth.totalLengthOfHyphae / spacingMicrons) + 1;
 
             this.particleManager.resetClosestParticles(this.hyphaeGrowth.cytoplasmSegments);
@@ -59,7 +58,7 @@ export class Simulation {
                 this.hyphaeGrowth.cytoplasmSegments,
                 this.numberOfCytoplasmSegments
             );
-        }
+        
 
         this.solver.step(this.hyphaeGrowth.cytoplasmSegments, this.numberOfCytoplasmSegments);
 
