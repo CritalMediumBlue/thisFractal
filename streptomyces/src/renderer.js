@@ -5,21 +5,29 @@ import * as THREE from 'three';
 const MAX_PARTICLES = 10000;
 const _dummy = new THREE.Object3D();
 const _color = new THREE.Color();
+const grayColor = new THREE.Color(0x606060);
+const _zAxis = new THREE.Vector3(0, 0, 1);
+const _ringDir = new THREE.Vector3();
 
-function _makeTextSprite(text) {
+function _makeTextSprite(lines) {
+    if (!Array.isArray(lines)) lines = [lines];
     const canvas = document.createElement('canvas');
     canvas.width = 512;
     canvas.height = 512;
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = 'black';
-    ctx.font = 'bold 40px Arial';
-    ctx.textAlign = 'center';
+    ctx.font = 'bold 30px Arial';
+    ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(text, 256, 256);
+    const lineHeight = 35;
+    const startY = 256 - ((lines.length - 1) * lineHeight) / 2;
+    for (let i = 0; i < lines.length; i++) {
+        ctx.fillText(lines[i], 256, startY + i * lineHeight);
+    }
     const texture = new THREE.CanvasTexture(canvas);
     const material = new THREE.SpriteMaterial({ map: texture, depthTest: false });
     const sprite = new THREE.Sprite(material);
-    sprite.scale.set(Constants.CYTOPLASM_RADIUS * 0.8, Constants.CYTOPLASM_RADIUS * 0.8, 1);
+    sprite.scale.set(600, 600, 1);
     return sprite;
 }
 
@@ -29,11 +37,17 @@ export class Renderer {
         this.intSegmentMesh = null;
         this.particleMesh = null;
         this.tipocMesh = null;
+        this.ringMesh = null;
         this._lastSegCount = -1;
         this._regularCount = 0;
         this._tipCount = 0;
         this.labels = [];
         this.scene = null;
+        this.helperAxis = new THREE.AxesHelper(5000);
+        this.helperAxis.position.set(0.1, 0.1, 0.1); // slight offset to prevent z-fighting with segment meshes
+        this.helperGrid = new THREE.GridHelper(10000, 10);
+        this.helperGrid.rotation.x = Math.PI / 2; // rotate to XY plane
+        this._helpersVisible = false;
     }
 
     init(scene) {
@@ -64,6 +78,16 @@ export class Renderer {
         this.intSegmentMesh.count = 0;
         this.intSegmentMesh.frustumCulled = false;
         scene.add(this.intSegmentMesh);
+
+
+        //Create the shapes for the separation of the hyphae as rings
+        const ringGeo = new THREE.RingGeometry(Constants.INT_CYTOPLASM_RADIUS*0.5, Constants.INT_CYTOPLASM_RADIUS*1, 32);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x303030, side: THREE.DoubleSide });
+        this.ringMesh = new THREE.InstancedMesh(ringGeo, ringMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
+        this.ringMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        this.ringMesh.count = 0;
+        this.ringMesh.frustumCulled = false;
+        scene.add(this.ringMesh);
 
  
 
@@ -97,7 +121,7 @@ export class Renderer {
             this._lastSegCount = segCount;
         } else {
             // Only ATP concentrations changed — update colors only
-            this._updateSegmentColors(cytoplasmSegments, segCount);
+            this._updateSegmentColors(cytoplasmSegments, segCount, stopped);
         }
 
         // Brownian particles move every frame — always update
@@ -143,70 +167,86 @@ export class Renderer {
             this._removeLabels();
         }
 
+        // Show/hide helper axis and grid when stopped
+        if (stopped && !this._helpersVisible) {
+            this.scene.add(this.helperAxis);
+            this.scene.add(this.helperGrid);
+            this._helpersVisible = true;
+        } else if (!stopped && this._helpersVisible) {
+            this.scene.remove(this.helperAxis);
+            this.scene.remove(this.helperGrid);
+            this._helpersVisible = false;
+        }
+
         canvas.render();
     }
 
 
 
 
-    _rebuildSegmentMatrices(cytoplasmSegments, segCount, stopped = false) {
-        let regularCount = 0;
-        let tipCount = 0;
-
+    _rebuildSegmentMatrices(cytoplasmSegments, segCount, stopped) {
+        // Pass 1: segment sphere matrices
         for (let i = 0; i < segCount; i++) {
             const seg = cytoplasmSegments[i];
             _dummy.position.set(seg.x, seg.y, 0);
             _dummy.rotation.set(0, 0, seg.direction - Math.PI / 2);
             if (seg.neighbors.length === 2 && seg.tipocSize > 0 || seg.neighbors.length === 3) {
-                _dummy.rotation.set(0, 0, seg.direction );
+                _dummy.rotation.set(0, 0, seg.direction);
             }
             _dummy.scale.set(1, 1, 1);
             _dummy.updateMatrix();
-            if (seg.tipocSize > 0) {
-                this.segmentMesh.setMatrixAt(tipCount, _dummy.matrix);
-                this.intSegmentMesh.setMatrixAt(tipCount, _dummy.matrix);
-                tipCount++;
-            } else {
-                this.segmentMesh.setMatrixAt(regularCount, _dummy.matrix);
-                this.intSegmentMesh.setMatrixAt(regularCount, _dummy.matrix);
-                regularCount++;
+            this.segmentMesh.setMatrixAt(i, _dummy.matrix);
+            this.intSegmentMesh.setMatrixAt(i, _dummy.matrix);
+        }
+
+        // Pass 2: septa ring matrices — placed at segments where finishedCell > 0
+        let ringCount = 0;
+        for (let i = 0; i < segCount; i++) {
+            const seg = cytoplasmSegments[i];
+            if (seg.index % 20 === 0) {
+                _dummy.position.set(seg.x, seg.y, 0);
+                _dummy.scale.set(1, 1, 1);
+                // Orient ring perpendicular to the hyphae growth direction
+                _ringDir.set(Math.cos(seg.direction), Math.sin(seg.direction), 0);
+                _dummy.quaternion.setFromUnitVectors(_zAxis, _ringDir);
+                _dummy.updateMatrix();
+                this.ringMesh.setMatrixAt(ringCount, _dummy.matrix);
+                ringCount++;
             }
         }
 
-        this._regularCount = regularCount;
-        this._tipCount = tipCount;
-
-        this.segmentMesh.count = regularCount;
+        this.segmentMesh.count = segCount;
         this.segmentMesh.instanceMatrix.needsUpdate = true;
-        this.intSegmentMesh.count = regularCount;
+        this.intSegmentMesh.count = segCount;
         this.intSegmentMesh.instanceMatrix.needsUpdate = true;
+        this.ringMesh.count = ringCount;
+        this.ringMesh.instanceMatrix.needsUpdate = true;
 
-        this._applySegmentColors(cytoplasmSegments, segCount);
+        this._applySegmentColors(cytoplasmSegments, segCount, stopped);
     }
 
-    _updateSegmentColors(cytoplasmSegments, segCount) {
-        this._applySegmentColors(cytoplasmSegments, segCount);
+    _updateSegmentColors(cytoplasmSegments, segCount, stopped) {
+        this._applySegmentColors(cytoplasmSegments, segCount, stopped);
     }
 
-    _applySegmentColors(cytoplasmSegments, segCount) {
-        let regularCount = 0;
-        let tipCount = 0;
-
+    _applySegmentColors(cytoplasmSegments, segCount, stopped) {
         for (let i = 0; i < segCount; i++) {
             const seg = cytoplasmSegments[i];
             viridisToThreeColor(seg.ATPConcentration, _color);
-            const colorBright = _color.clone().multiplyScalar(2);
-            const colorDim = _color.clone().multiplyScalar(0.5);
 
-            if (seg.tipocSize > 0) {
-                this.segmentMesh.setColorAt(tipCount, colorDim);
-                this.intSegmentMesh.setColorAt(tipCount, colorBright);
-                tipCount++;
+            let colorBright;
+            let colorDim;
+
+            if (stopped) {
+                colorBright = grayColor.clone().multiplyScalar(2);
+                colorDim = grayColor.clone().multiplyScalar(0.3);
             } else {
-                this.segmentMesh.setColorAt(regularCount, colorDim);
-                this.intSegmentMesh.setColorAt(regularCount, colorBright);
-                regularCount++;
+                colorBright = _color.clone().multiplyScalar(2);
+                colorDim = _color.clone().multiplyScalar(0.5);
             }
+
+            this.segmentMesh.setColorAt(i, colorDim);
+            this.intSegmentMesh.setColorAt(i, colorBright);
         }
 
         if (this.segmentMesh.instanceColor) this.segmentMesh.instanceColor.needsUpdate = true;
@@ -239,11 +279,11 @@ export class Renderer {
                 this.labels.push(sprite);
             }
 
-     
+      
 
-            //create a text sprite for the index of the segment
-            const indexText = String('i: ' + seg.index);
-            const indexSprite = _makeTextSprite(indexText);
+            //create a text sprite for the index of the segment///  units in micrometers
+            const indexSprite = _makeTextSprite(['i: ' + seg.index, 'd: ' + (seg.distanceFromTheTip/1000).toFixed(2) + 
+                ' \u03BCm', 'm: ' + seg.availableMacromolecules.toFixed(2), 'a: ' + seg.ATPConcentration.toFixed(2)]);
             const rotationAngle = seg.direction - Math.PI / 2;
             indexSprite.position.set(-Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle)  + seg.x, -Constants.CYTOPLASM_RADIUS * Math.sin(rotationAngle) + seg.y, 0);
             this.scene.add(indexSprite);
@@ -252,7 +292,7 @@ export class Renderer {
     }
 
     _disposeMeshes(scene) {
-        const meshes = ['segmentMesh', 'intSegmentMesh', 'particleMesh', 'tipocMesh'];
+        const meshes = ['segmentMesh', 'intSegmentMesh', 'particleMesh', 'tipocMesh', 'ringMesh'];
         for (const name of meshes) {
             if (this[name]) {
                 scene.remove(this[name]);
@@ -268,5 +308,11 @@ export class Renderer {
             label.material.dispose();
         }
         this.labels = [];
+        // Remove helpers if visible
+        if (this._helpersVisible) {
+            scene.remove(this.helperAxis);
+            scene.remove(this.helperGrid);
+            this._helpersVisible = false;
+        }
     }
 }

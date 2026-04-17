@@ -7,7 +7,7 @@ export const Constants = {
    
     MINIMUM_ATP_CONCENTRATION:  (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The minimum concentration of ATP in living cells is arround 1mM per µm^3.
     MAX_ATP_CONCENTRATION: 5 * (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The maximum concentration of ATP in living cells is arround 5mM per µm^3.
-    ATP_PRODUCTION_RATE: 0.001, // Millions of Molecules per second per µm^3 of FOCI
+    ATP_PRODUCTION_RATE: 0.0008, // Millions of Molecules per second per µm^3 of FOCI
     ATP_TO_MACROMOLECULES: 500, // How many ATP molecules are required to produce one macromolecule
 
     // Geometry of the hyphae

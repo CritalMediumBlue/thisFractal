@@ -25,6 +25,7 @@ export class HyphaeGrowth {
             0,
             0,
             0,
+            0,
             Constants.TIPOC_SPLITTING_SIZE * 0.95,
             4
         );
@@ -36,10 +37,12 @@ export class HyphaeGrowth {
 
         let newX = Spore.x + Math.cos(Spore.direction - Math.PI) * Constants.SEGMENT_SPACING;
         let newY = Spore.y + Math.sin(Spore.direction - Math.PI) * Constants.SEGMENT_SPACING;
+        let newZ = Spore.z;
 
         this._addNewCytoplasmSegment(
             newX,
             newY,
+            newZ,
             Math.PI,
             Spore,
             segments,
@@ -57,11 +60,11 @@ export class HyphaeGrowth {
         return segments;
     }
 
-    _addNewCytoplasmSegment(x, y, direction, lastSegment, segments, tipocsize, macmol) {
+    _addNewCytoplasmSegment(x, y, z, direction, lastSegment, segments, tipocsize, macmol) {
         let newIndex = lastSegment.index + 1;
         this.totalLengthOfHyphae += Constants.SEGMENT_SPACING;
 
-        const newSegment = new CytoplasmSegment(x, y, direction, newIndex, 0, tipocsize, macmol);
+        const newSegment = new CytoplasmSegment(x, y, z, direction, newIndex, 0, tipocsize, macmol);
         segments.push(newSegment);
         const hash = lastSegment.branchHash;
         newSegment.branchHash = hash;
@@ -120,9 +123,10 @@ export class HyphaeGrowth {
     }
 
     _elongateCytoplasm(lastPoint, particleManager, numberOfCytoplasmSegments) {
-        const [newX, newY] = [
+        const [newX, newY, newZ] = [
             lastPoint.x + Math.cos(lastPoint.direction) * Constants.SEGMENT_SPACING,
-            lastPoint.y + Math.sin(lastPoint.direction) * Constants.SEGMENT_SPACING
+            lastPoint.y + Math.sin(lastPoint.direction) * Constants.SEGMENT_SPACING,
+            lastPoint.z
         ];
         const newDirection = lastPoint.direction + (Math.random() - 0.5) * Constants.CURVINESS;
         if (lastPoint.tipocSize >= Constants.TIPOC_SPLITTING_SIZE) {
@@ -130,14 +134,14 @@ export class HyphaeGrowth {
             lastPoint.tipocSize = lastPoint.tipocSize - newTipoCSize;
             lastPoint.originalDirection = newDirection;
             lastPoint.direction = Math.random() < 0.5 ? newDirection + Math.PI / 2 : lastPoint.direction - Math.PI / 2;
-            this._addNewCytoplasmSegment(newX, newY, newDirection, lastPoint, this.cytoplasmSegments, newTipoCSize, 0);
+            this._addNewCytoplasmSegment(newX, newY, newZ, newDirection, lastPoint, this.cytoplasmSegments, newTipoCSize, 0);
             const branchHash = this._generateBranchHash();
             const originalBranchHash = lastPoint.branchHash;
             lastPoint.originalBranchHash = originalBranchHash;
             lastPoint.branchHash = branchHash;
             this.branches.push(branchHash);
         } else {
-            this._addNewCytoplasmSegment(newX, newY, newDirection, lastPoint, this.cytoplasmSegments, lastPoint.tipocSize, 0);
+            this._addNewCytoplasmSegment(newX, newY, newZ, newDirection, lastPoint, this.cytoplasmSegments, lastPoint.tipocSize, 0);
             lastPoint.tipocSize = 0;
         }
 

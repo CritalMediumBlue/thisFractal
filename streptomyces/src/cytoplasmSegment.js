@@ -1,7 +1,8 @@
 export class CytoplasmSegment {
-    constructor(x, y, direction, index, atpConcentration, tipocSize, availableMacromolecules) {
+    constructor(x, y, z, direction, index, atpConcentration, tipocSize, availableMacromolecules) {
         this.x = x;
         this.y = y;
+        this.z = z;
         this.direction = direction; // Angle in radians. Tells the direction in which the segment is growing, or the direction of the cytoplasmic stretching
         this.ATPConcentration = atpConcentration;
         this.neighbors = []; // Array of neighboring segments that are connected to this segment. This is used in the diffusion simulation. The velocity at which a metabolite  (either macromolecules or ATP)diffuses is proportional to the concentration of the metabolite in the neighboring segments

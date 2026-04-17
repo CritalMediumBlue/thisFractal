@@ -29,7 +29,7 @@ function downloadCanvasImage(canvas, filename) {
 }
 
 addEventListener('keydown', function (event) {
-    if (event.key === 's') {
+    if (event.key === ' ' || event.key === 'Spacebar') {
         stopped = !stopped;
     } else if (event.key === 'ArrowRight' && stopped) {
         simulation.update();
