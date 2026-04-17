@@ -104,7 +104,7 @@ export class ParticleManager {
         const branchHash = lastSegment.branchHash;
 
         let randomSegment = cytoplasmSegments[Math.floor(Math.random() * numberOfCytoplasmSegments)];
-        while (randomSegment.branchHash !== branchHash || randomSegment.distanceFromTheTip >= 4) {
+        while (randomSegment.branchHash !== branchHash || randomSegment.distanceFromTheTip >= 4000) {
             randomSegment = cytoplasmSegments[Math.floor(Math.random() * numberOfCytoplasmSegments)];
         }
 

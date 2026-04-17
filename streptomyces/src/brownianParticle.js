@@ -19,10 +19,10 @@ export class BrownianParticle {
 
     applyBrownianImpulse(closestCytoplasmSegment, physicsWorld) {
         const Df = (1/(closestCytoplasmSegment.tipocSize*300+1)); //TIPOC INFLUENCES DIFFUSION
-        const size_meters = this.size*(1/1e6); //from micrometers to meters
+        const size_meters = this.size*(1/1e9); //from nanometers to meters
         const Do1 = Constants.Do/size_meters; // m^2/s
-        const Do = Do1*(1e6/1)**2; // micrometers^2/s
-        const normalDiffusionCoef = Do*Df; // µm^2/s
+        const Do = Do1*(1e9)**2; // nm^2/s
+        const normalDiffusionCoef = Do*Df; // nm^2/s
 
         // Two independent Brownian kicks (matching the original two displacement steps)
         const step = Math.sqrt(normalDiffusionCoef*2*5);

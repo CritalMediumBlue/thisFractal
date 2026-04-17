@@ -22,8 +22,8 @@ export class Renderer {
     init(scene) {
         this._disposeMeshes(scene);
 
-        // Segment spheres
-        const segGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, Constants.WIDTH_SEGMENTS, Constants.HEIGHT_SEGMENTS, 0, Math.PI * 2.0, Constants.THETA_START, Constants.THETA_LENGTH);
+        // Segment cylinders
+        const segGeo = new THREE.CylinderGeometry(Constants.CYTOPLASM_RADIUS, Constants.CYTOPLASM_RADIUS, Constants.SEGMENT_SPACING, Constants.WIDTH_SEGMENTS, Constants.HEIGHT_SEGMENTS, true);
         const segMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
         this.segmentMesh = new THREE.InstancedMesh(segGeo, segMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
         this.segmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -35,7 +35,7 @@ export class Renderer {
         this.segmentMesh.frustumCulled = false;
         scene.add(this.segmentMesh);
 
-        const intSegGeo = new THREE.SphereGeometry(Constants.INT_CYTOPLASM_RADIUS, Constants.WIDTH_SEGMENTS, Constants.HEIGHT_SEGMENTS, 0, Math.PI * 2.0, Constants.THETA_START, Constants.THETA_LENGTH);
+        const intSegGeo = new THREE.CylinderGeometry(Constants.INT_CYTOPLASM_RADIUS, Constants.INT_CYTOPLASM_RADIUS, Constants.SEGMENT_SPACING, Constants.WIDTH_SEGMENTS, Constants.HEIGHT_SEGMENTS, true);
         const intSegMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
         this.intSegmentMesh = new THREE.InstancedMesh(intSegGeo, intSegMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
         this.intSegmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);

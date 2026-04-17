@@ -51,7 +51,7 @@ export class Statistics {
         this.averageATPConcentration = this.totalATP1 / numberOfSegments;
         this.averageMacromolecules = this.totalMacromolecules1 / numberOfSegments;
 
-        this.history.lengthOfFirstBranch[this.time] = (sim.hyphaeGrowth.lengthOfFirstBranch - 1) * Constants.SEGMENT_SPACING / 1000;
+        this.history.lengthOfFirstBranch[this.time] = (sim.hyphaeGrowth.lengthOfFirstBranch - 1) * Constants.SEGMENT_SPACING;
 
         if (this.time > 60 * 30) {
             this.GrowthRateOfFirstBranch = (this.history.lengthOfFirstBranch[this.time] - this.history.lengthOfFirstBranch[this.time - 60 * 30]) / 30;

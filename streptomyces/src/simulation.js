@@ -39,8 +39,8 @@ export class Simulation {
     }
 
     update() {
-        const spacingMicrons = Constants.SEGMENT_SPACING / 1000;
-            this.numberOfCytoplasmSegments = Math.round(this.hyphaeGrowth.totalLengthOfHyphae / spacingMicrons) + 1;
+        const spacing = Constants.SEGMENT_SPACING;
+            this.numberOfCytoplasmSegments = Math.round(this.hyphaeGrowth.totalLengthOfHyphae / spacing) + 1;
 
             this.particleManager.resetClosestParticles(this.hyphaeGrowth.cytoplasmSegments);
             this.particleManager.updateBrownianParticles(this.stats.time);
@@ -51,7 +51,7 @@ export class Simulation {
                 this.physicsWorld
             );
             this.particleManager.updateQuadtrees(this.hyphaeGrowth.cytoplasmSegments);
-            this.numberOfCytoplasmSegments = Math.round(this.hyphaeGrowth.totalLengthOfHyphae / spacingMicrons) + 1;
+            this.numberOfCytoplasmSegments = Math.round(this.hyphaeGrowth.totalLengthOfHyphae / spacing) + 1;
             this.hyphaeGrowth.numberOfCytoplasmSegments = this.numberOfCytoplasmSegments;
 
             this.solver.updateSegmentToArrayIndex(
@@ -70,7 +70,7 @@ export class Simulation {
 
         this.stats.record(this);
 
-        if (this.stats.time > Constants.MAX_TIME || Math.round(this.hyphaeGrowth.totalLengthOfHyphae / spacingMicrons) >= Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS - 100) {
+        if (this.stats.time > Constants.MAX_TIME || Math.round(this.hyphaeGrowth.totalLengthOfHyphae / spacing) >= Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS - 100) {
             
             exportSimulationData(this.stats.history, this.stats.time);
 

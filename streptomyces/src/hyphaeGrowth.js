@@ -49,7 +49,7 @@ export class HyphaeGrowth {
         // Initial concentrations are set via the segment constructor (macmol=4)
         // The solver reads from segments at the start of each step()
 
-        Spore.distanceFromTheTip = Constants.SEGMENT_SPACING / 1000;
+        Spore.distanceFromTheTip = Constants.SEGMENT_SPACING;
 
         this.lengthOfFirstBranch = 2;
 
@@ -58,7 +58,7 @@ export class HyphaeGrowth {
 
     _addNewCytoplasmSegment(x, y, direction, lastSegment, segments, tipocsize, macmol) {
         let newIndex = lastSegment.index + 1;
-        this.totalLengthOfHyphae += Constants.SEGMENT_SPACING / 1000;
+        this.totalLengthOfHyphae += Constants.SEGMENT_SPACING;
 
         const newSegment = new CytoplasmSegment(x, y, direction, newIndex, 0, tipocsize, macmol);
         segments.push(newSegment);
@@ -106,7 +106,7 @@ export class HyphaeGrowth {
 
                 this.cytoplasmSegments.forEach(point => {
                     if (point.branchHash === lastPoint.branchHash) {
-                        point.distanceFromTheTip += Constants.SEGMENT_SPACING / 1000;
+                        point.distanceFromTheTip += Constants.SEGMENT_SPACING;
                     }
                 });
                 this._elongateCytoplasm(lastPoint, particleManager, numberOfCytoplasmSegments);
