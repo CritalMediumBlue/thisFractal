@@ -76,7 +76,7 @@ export class Simulation {
 
             exportTraces(this.particleManager.brownianParticles);
 
-            this.draw();
+            this.draw(false);
 
             const link = document.createElement('a');
             const filename = `final_simulation_${this.stats.time}.png`;
@@ -88,13 +88,16 @@ export class Simulation {
         }
     }
 
-    draw() {
+    draw(stopped) {
         this.renderer.draw(
             this.hyphaeGrowth.cytoplasmSegments,
             this.particleManager.brownianParticles,
             this.numberOfCytoplasmSegments,
-            this.canvas
+            this.canvas,
+            stopped
         );
+
+
     }
 }
 

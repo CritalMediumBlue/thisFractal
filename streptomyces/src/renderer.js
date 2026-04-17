@@ -6,6 +6,23 @@ const MAX_PARTICLES = 10000;
 const _dummy = new THREE.Object3D();
 const _color = new THREE.Color();
 
+function _makeTextSprite(text) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'black';
+    ctx.font = 'bold 40px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 256, 256);
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.SpriteMaterial({ map: texture, depthTest: false });
+    const sprite = new THREE.Sprite(material);
+    sprite.scale.set(Constants.CYTOPLASM_RADIUS * 0.8, Constants.CYTOPLASM_RADIUS * 0.8, 1);
+    return sprite;
+}
+
 export class Renderer {
     constructor() {
         this.segmentMesh = null;
@@ -17,13 +34,16 @@ export class Renderer {
         this._lastSegCount = -1;
         this._regularCount = 0;
         this._tipCount = 0;
+        this.labels = [];
+        this.scene = null;
     }
 
     init(scene) {
+        this.scene = scene;
         this._disposeMeshes(scene);
 
         // Segment cylinders
-        const segGeo = new THREE.CylinderGeometry(Constants.CYTOPLASM_RADIUS, Constants.CYTOPLASM_RADIUS, Constants.SEGMENT_SPACING, Constants.WIDTH_SEGMENTS, Constants.HEIGHT_SEGMENTS, true);
+        const segGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, Constants.WIDTH_SEGMENTS, Constants.HEIGHT_SEGMENTS, 0, Math.PI * 2.0, Constants.THETA_START, Constants.THETA_LENGTH);
         const segMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
         this.segmentMesh = new THREE.InstancedMesh(segGeo, segMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
         this.segmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -35,7 +55,7 @@ export class Renderer {
         this.segmentMesh.frustumCulled = false;
         scene.add(this.segmentMesh);
 
-        const intSegGeo = new THREE.CylinderGeometry(Constants.INT_CYTOPLASM_RADIUS, Constants.INT_CYTOPLASM_RADIUS, Constants.SEGMENT_SPACING, Constants.WIDTH_SEGMENTS, Constants.HEIGHT_SEGMENTS, true);
+        const intSegGeo = new THREE.SphereGeometry(Constants.INT_CYTOPLASM_RADIUS, Constants.WIDTH_SEGMENTS, Constants.HEIGHT_SEGMENTS, 0, Math.PI * 2.0, Constants.THETA_START, Constants.THETA_LENGTH);
         const intSegMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
         this.intSegmentMesh = new THREE.InstancedMesh(intSegGeo, intSegMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
         this.intSegmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -72,6 +92,12 @@ export class Renderer {
         this.tipIntSegmentMesh.frustumCulled = false;
         scene.add(this.tipIntSegmentMesh);
 
+
+
+
+
+        
+
         // Particle spheres (smaller, green)
         const partGeo = new THREE.SphereGeometry(Constants.FOCUS_RADIUS, 6, 6);
         const partMat = new THREE.MeshBasicMaterial({ color: 0x66ff66, opacity: 0.5, transparent: true });
@@ -91,12 +117,12 @@ export class Renderer {
         scene.add(this.tipocMesh);
     }
 
-    draw(cytoplasmSegments, brownianParticles, segCount, canvas) {
+    draw(cytoplasmSegments, brownianParticles, segCount, canvas, stopped) {
         const segmentsChanged = segCount !== this._lastSegCount;
 
         if (segmentsChanged) {
             // Segments were added or reclassified (tip→regular) — rebuild matrices + colors
-            this._rebuildSegmentMatrices(cytoplasmSegments, segCount);
+            this._rebuildSegmentMatrices(cytoplasmSegments, segCount, stopped);
             this._lastSegCount = segCount;
         } else {
             // Only ATP concentrations changed — update colors only
@@ -139,10 +165,20 @@ export class Renderer {
         this.tipocMesh.count = tipocCount;
         this.tipocMesh.instanceMatrix.needsUpdate = true;
 
+        // Rebuild segment labels when stopped
+        if (stopped && this.labels.length === 0) {
+            this._rebuildLabels(cytoplasmSegments, segCount);
+        } else if (!stopped && this.labels.length > 0) {
+            this._removeLabels();
+        }
+
         canvas.render();
     }
 
-    _rebuildSegmentMatrices(cytoplasmSegments, segCount) {
+
+
+
+    _rebuildSegmentMatrices(cytoplasmSegments, segCount, stopped = false) {
         let regularCount = 0;
         let tipCount = 0;
 
@@ -155,11 +191,11 @@ export class Renderer {
             viridisToThreeColor(seg.ATPConcentration, _color);
 
             if (seg.tipocSize > 0) {
-                this.tipSegmentMesh.setMatrixAt(tipCount, _dummy.matrix);
-                this.tipIntSegmentMesh.setMatrixAt(tipCount, _dummy.matrix);
-                this.tipSegmentMesh.setColorAt(tipCount, _color);
+                this.segmentMesh.setMatrixAt(tipCount, _dummy.matrix);
+                this.intSegmentMesh.setMatrixAt(tipCount, _dummy.matrix);
+                this.segmentMesh.setColorAt(tipCount, _color);
                 _color.multiplyScalar(2);
-                this.tipIntSegmentMesh.setColorAt(tipCount, _color);
+                this.intSegmentMesh.setColorAt(tipCount, _color);
                 tipCount++;
             } else {
                 this.segmentMesh.setMatrixAt(regularCount, _dummy.matrix);
@@ -186,6 +222,7 @@ export class Renderer {
         this.tipIntSegmentMesh.count = tipCount;
         this.tipIntSegmentMesh.instanceMatrix.needsUpdate = true;
         if (this.tipIntSegmentMesh.instanceColor) this.tipIntSegmentMesh.instanceColor.needsUpdate = true;
+
     }
 
     _updateSegmentColors(cytoplasmSegments, segCount) {
@@ -197,9 +234,9 @@ export class Renderer {
             viridisToThreeColor(seg.ATPConcentration, _color);
 
             if (seg.tipocSize > 0) {
-                this.tipSegmentMesh.setColorAt(tipCount, _color);
+                this.segmentMesh.setColorAt(tipCount, _color);
                 _color.multiplyScalar(2);
-                this.tipIntSegmentMesh.setColorAt(tipCount, _color);
+                this.intSegmentMesh.setColorAt(tipCount, _color);
                 tipCount++;
             } else {
                 this.segmentMesh.setColorAt(regularCount, _color);
@@ -215,6 +252,44 @@ export class Renderer {
         if (this.tipIntSegmentMesh.instanceColor) this.tipIntSegmentMesh.instanceColor.needsUpdate = true;
     }
 
+    _removeLabels() {
+        for (const label of this.labels) {
+            this.scene.remove(label);
+            label.material.map.dispose();
+            label.material.dispose();
+        }
+        this.labels = [];
+    }
+
+    _rebuildLabels(cytoplasmSegments, segCount) {
+        this._removeLabels();
+
+        // Create new labels
+        for (let i = 0; i < segCount; i++) {
+            const seg = cytoplasmSegments[i];
+
+            if (seg.tipocSize > 0 || seg.neighbors.length > 2 || seg.neighbors.length < 2 || seg.index === 0 || seg.index % 5 === 0) {
+                // Create a text sprite for the branch hash
+                const text = String('b: ' + seg.branchHash);
+                const sprite = _makeTextSprite(text);
+                const rotationAngle = seg.direction - Math.PI / 2;
+                sprite.position.set( Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle)  + seg.x, Constants.CYTOPLASM_RADIUS * Math.sin(rotationAngle) + seg.y, 0);
+                this.scene.add(sprite);
+                this.labels.push(sprite);
+            }
+
+     
+
+            //create a text sprite for the index of the segment
+            const indexText = String('i: ' + seg.index);
+            const indexSprite = _makeTextSprite(indexText);
+            const rotationAngle = seg.direction - Math.PI / 2;
+            indexSprite.position.set(-Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle)  + seg.x, -Constants.CYTOPLASM_RADIUS * Math.sin(rotationAngle) + seg.y, 0);
+            this.scene.add(indexSprite);
+            this.labels.push(indexSprite);
+        }
+    }
+
     _disposeMeshes(scene) {
         const meshes = ['segmentMesh', 'intSegmentMesh', 'tipSegmentMesh', 'tipIntSegmentMesh', 'particleMesh', 'tipocMesh'];
         for (const name of meshes) {
@@ -225,5 +300,12 @@ export class Renderer {
                 this[name] = null;
             }
         }
+        // Dispose labels
+        for (const label of this.labels) {
+            scene.remove(label);
+            label.material.map.dispose();
+            label.material.dispose();
+        }
+        this.labels = [];
     }
 }

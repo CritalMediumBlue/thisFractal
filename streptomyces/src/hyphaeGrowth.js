@@ -8,6 +8,7 @@ export class HyphaeGrowth {
         this.lengthOfFirstBranch = 0;
         this.cytoplasmSegments = [];
         this.numberOfCytoplasmSegments = 0;
+        this.numberOfBranches = 0;
     }
 
     init(solver) {
@@ -30,7 +31,7 @@ export class HyphaeGrowth {
 
         const segments = [Spore];
 
-        Spore.branchHash = this._generateBranchHash(Spore.x, Spore.y);
+        Spore.branchHash = this._generateBranchHash(Spore.x, Spore.y, Spore.direction, Spore.availableMacromolecules, Spore.tipocSize, Spore.ATPConcentration);
         this.branches.push(Spore.branchHash);
 
         let newX = Spore.x + Math.cos(Spore.direction - Math.PI) * Constants.SEGMENT_SPACING;
@@ -130,7 +131,7 @@ export class HyphaeGrowth {
             lastPoint.originalDirection = newDirection;
             lastPoint.direction = Math.random() < 0.5 ? newDirection + Math.PI / 2 : lastPoint.direction - Math.PI / 2;
             this._addNewCytoplasmSegment(newX, newY, newDirection, lastPoint, this.cytoplasmSegments, newTipoCSize, 0);
-            const branchHash = this._generateBranchHash(lastPoint.x, lastPoint.y);
+            const branchHash = this._generateBranchHash();
             const originalBranchHash = lastPoint.branchHash;
             lastPoint.originalBranchHash = originalBranchHash;
             lastPoint.branchHash = branchHash;
@@ -145,14 +146,11 @@ export class HyphaeGrowth {
         }
     }
 
-    _generateBranchHash(x, y) {
-        const uniqueString = `${x},${y}`;
-        let hash = 0;
-        for (let i = 0; i < uniqueString.length; i++) {
-            const char = uniqueString.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash;
-        }
-        return hash.toString(16);
+
+
+    _generateBranchHash() {
+
+        this.numberOfBranches++;
+        return this.numberOfBranches;
     }
 }

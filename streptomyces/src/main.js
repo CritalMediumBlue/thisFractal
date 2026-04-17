@@ -21,7 +21,7 @@ function updateSimulation() {
 
 
 function downloadCanvasImage(canvas, filename) {
-    simulation.draw(); // Ensure the latest frame is rendered before downloading
+    simulation.draw(stopped); // Ensure the latest frame is rendered before downloading
     const link = document.createElement('a');
     link.href = canvas.toDataURL('image/png');
     link.download = filename;
@@ -43,7 +43,7 @@ addEventListener('keydown', function (event) {
 
 // Continuous render loop for OrbitControls & scene display
 function renderLoop() {
-    simulation.draw();
+    simulation.draw(stopped);
     setTimeout(renderLoop, 100); // ~10 FPS, adjust as needed
 }
 

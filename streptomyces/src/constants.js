@@ -21,7 +21,7 @@ export const Constants = {
     WIDTH_SEGMENTS_TIP: 15,
     HEIGHT_SEGMENTS_TIP: 3,
     CURVINESS: 0.35, // Higher values make t8he hyphae more tortuous, lower values make the hyphae more straight
-    MACROMOLECULES_REQUIRED_FOR_ELONGATION:3, // This tells us how many macromolecules have to be consumed in each cytoplasm segment for the hyphae to elongate (Add a new segment at the tip).
+    MACROMOLECULES_REQUIRED_FOR_ELONGATION:0.3, // This tells us how many macromolecules have to be consumed in each cytoplasm segment for the hyphae to elongate (Add a new segment at the tip).
 
     // Brownian particles (foci) constants
     ADD_FOCI_EVERY: 2,  //every 2th cytoplasm segment a green fluorescent foci is added
