@@ -10,18 +10,18 @@ export class Canvas {
 
         // Camera — position above the simulation starting area
         const aspect = window.innerWidth / window.innerHeight;
-        this.camera = new THREE.PerspectiveCamera(60, aspect, 1, 500000);
-        this.fog = new THREE.Fog(0x111111, 2, 200000);
+        this.camera = new THREE.PerspectiveCamera(60, aspect, 1000, 500000);
+        this.fog = new THREE.Fog(0x111111, 2, 100000);
         this.scene.fog = this.fog;
 
         // Spore starts near (250, 78); hyphae grow outward from there
         const cx = Constants.CANVAS_WIDTH / 10;
         const cy = Constants.CANVAS_HEIGHT / 18;
-        this.camera.position.set(cx, cy, 500);
+        this.camera.position.set(cx, cy, 10000);
         this.camera.lookAt(cx, cy, 0);
 
         // Renderer
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer = new THREE.WebGLRenderer({ antialias: false });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(this.renderer.domElement);

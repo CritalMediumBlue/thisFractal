@@ -14,6 +14,9 @@ export class Renderer {
         this.tipIntSegmentMesh = null;
         this.particleMesh = null;
         this.tipocMesh = null;
+        this._lastSegCount = -1;
+        this._regularCount = 0;
+        this._tipCount = 0;
     }
 
     init(scene) {
@@ -89,46 +92,18 @@ export class Renderer {
     }
 
     draw(cytoplasmSegments, brownianParticles, segCount, canvas) {
-        let regularCount = 0;
-        let tipCount = 0;
+        const segmentsChanged = segCount !== this._lastSegCount;
 
-        for (let i = 0; i < segCount; i++) {
-            const seg = cytoplasmSegments[i];
-            _dummy.position.set(seg.x, seg.y, 0);
-            _dummy.rotation.set(0, 0, seg.direction - Math.PI / 2);
-            _dummy.scale.set(1, 1, 1);
-            _dummy.updateMatrix();
-            viridisToThreeColor(seg.ATPConcentration, _color);
-
-            if (seg.tipocSize > 0) {
-                this.tipSegmentMesh.setMatrixAt(tipCount, _dummy.matrix);
-                this.tipIntSegmentMesh.setMatrixAt(tipCount, _dummy.matrix);
-                this.tipSegmentMesh.setColorAt(tipCount, _color);
-                _color.multiplyScalar(2);
-                this.tipIntSegmentMesh.setColorAt(tipCount, _color);
-                tipCount++;
-            } else {
-                this.segmentMesh.setMatrixAt(regularCount, _dummy.matrix);
-                this.intSegmentMesh.setMatrixAt(regularCount, _dummy.matrix);
-                this.segmentMesh.setColorAt(regularCount, _color);
-                _color.multiplyScalar(2); // slightly darker for inner segment
-                this.intSegmentMesh.setColorAt(regularCount, _color);
-                regularCount++;
-            }
+        if (segmentsChanged) {
+            // Segments were added or reclassified (tip→regular) — rebuild matrices + colors
+            this._rebuildSegmentMatrices(cytoplasmSegments, segCount);
+            this._lastSegCount = segCount;
+        } else {
+            // Only ATP concentrations changed — update colors only
+            this._updateSegmentColors(cytoplasmSegments, segCount);
         }
-        this.segmentMesh.count = regularCount;
-        this.segmentMesh.instanceMatrix.needsUpdate = true;
-        if (this.segmentMesh.instanceColor) this.segmentMesh.instanceColor.needsUpdate = true;
-        this.intSegmentMesh.count = regularCount;
-        this.intSegmentMesh.instanceMatrix.needsUpdate = true;
-        if (this.intSegmentMesh.instanceColor) this.intSegmentMesh.instanceColor.needsUpdate = true;
-        this.tipSegmentMesh.count = tipCount;
-        this.tipSegmentMesh.instanceMatrix.needsUpdate = true;
-        if (this.tipSegmentMesh.instanceColor) this.tipSegmentMesh.instanceColor.needsUpdate = true;
-        this.tipIntSegmentMesh.count = tipCount;
-        this.tipIntSegmentMesh.instanceMatrix.needsUpdate = true;
-        if (this.tipIntSegmentMesh.instanceColor) this.tipIntSegmentMesh.instanceColor.needsUpdate = true;
 
+        // Brownian particles move every frame — always update
         const partCount = Math.min(brownianParticles.length, MAX_PARTICLES);
         this.particleMesh.count = partCount;
 
@@ -142,7 +117,7 @@ export class Renderer {
         }
         this.particleMesh.instanceMatrix.needsUpdate = true;
 
-        // TIPOC spheres — only for segments with tipocSize > 0
+        // TIPOC spheres grow each frame — always update
         let tipocCount = 0;
         for (let i = 0; i < segCount; i++) {
             const seg = cytoplasmSegments[i];
@@ -165,6 +140,79 @@ export class Renderer {
         this.tipocMesh.instanceMatrix.needsUpdate = true;
 
         canvas.render();
+    }
+
+    _rebuildSegmentMatrices(cytoplasmSegments, segCount) {
+        let regularCount = 0;
+        let tipCount = 0;
+
+        for (let i = 0; i < segCount; i++) {
+            const seg = cytoplasmSegments[i];
+            _dummy.position.set(seg.x, seg.y, 0);
+            _dummy.rotation.set(0, 0, seg.direction - Math.PI / 2);
+            _dummy.scale.set(1, 1, 1);
+            _dummy.updateMatrix();
+            viridisToThreeColor(seg.ATPConcentration, _color);
+
+            if (seg.tipocSize > 0) {
+                this.tipSegmentMesh.setMatrixAt(tipCount, _dummy.matrix);
+                this.tipIntSegmentMesh.setMatrixAt(tipCount, _dummy.matrix);
+                this.tipSegmentMesh.setColorAt(tipCount, _color);
+                _color.multiplyScalar(2);
+                this.tipIntSegmentMesh.setColorAt(tipCount, _color);
+                tipCount++;
+            } else {
+                this.segmentMesh.setMatrixAt(regularCount, _dummy.matrix);
+                this.intSegmentMesh.setMatrixAt(regularCount, _dummy.matrix);
+                this.segmentMesh.setColorAt(regularCount, _color);
+                _color.multiplyScalar(2);
+                this.intSegmentMesh.setColorAt(regularCount, _color);
+                regularCount++;
+            }
+        }
+
+        this._regularCount = regularCount;
+        this._tipCount = tipCount;
+
+        this.segmentMesh.count = regularCount;
+        this.segmentMesh.instanceMatrix.needsUpdate = true;
+        if (this.segmentMesh.instanceColor) this.segmentMesh.instanceColor.needsUpdate = true;
+        this.intSegmentMesh.count = regularCount;
+        this.intSegmentMesh.instanceMatrix.needsUpdate = true;
+        if (this.intSegmentMesh.instanceColor) this.intSegmentMesh.instanceColor.needsUpdate = true;
+        this.tipSegmentMesh.count = tipCount;
+        this.tipSegmentMesh.instanceMatrix.needsUpdate = true;
+        if (this.tipSegmentMesh.instanceColor) this.tipSegmentMesh.instanceColor.needsUpdate = true;
+        this.tipIntSegmentMesh.count = tipCount;
+        this.tipIntSegmentMesh.instanceMatrix.needsUpdate = true;
+        if (this.tipIntSegmentMesh.instanceColor) this.tipIntSegmentMesh.instanceColor.needsUpdate = true;
+    }
+
+    _updateSegmentColors(cytoplasmSegments, segCount) {
+        let regularCount = 0;
+        let tipCount = 0;
+
+        for (let i = 0; i < segCount; i++) {
+            const seg = cytoplasmSegments[i];
+            viridisToThreeColor(seg.ATPConcentration, _color);
+
+            if (seg.tipocSize > 0) {
+                this.tipSegmentMesh.setColorAt(tipCount, _color);
+                _color.multiplyScalar(2);
+                this.tipIntSegmentMesh.setColorAt(tipCount, _color);
+                tipCount++;
+            } else {
+                this.segmentMesh.setColorAt(regularCount, _color);
+                _color.multiplyScalar(2);
+                this.intSegmentMesh.setColorAt(regularCount, _color);
+                regularCount++;
+            }
+        }
+
+        if (this.segmentMesh.instanceColor) this.segmentMesh.instanceColor.needsUpdate = true;
+        if (this.intSegmentMesh.instanceColor) this.intSegmentMesh.instanceColor.needsUpdate = true;
+        if (this.tipSegmentMesh.instanceColor) this.tipSegmentMesh.instanceColor.needsUpdate = true;
+        if (this.tipIntSegmentMesh.instanceColor) this.tipIntSegmentMesh.instanceColor.needsUpdate = true;
     }
 
     _disposeMeshes(scene) {
