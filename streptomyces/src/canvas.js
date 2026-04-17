@@ -6,7 +6,7 @@ export class Canvas {
     constructor() {
         // Scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x606060);
+        this.scene.background = new THREE.Color(0x505050);
 
         // Camera — position above the simulation starting area
         const aspect = window.innerWidth / window.innerHeight;
