@@ -6,6 +6,9 @@ await RAPIER.init();
 
 const simulation = new Simulation();
 let selectedBranch = 0; // You can set this to a specific branch hash to focus on that branch
+const views = ['atp', 'debug']
+let currentViewIndex = 0;
+
 
 function updateSimulation() {
     if (!simulation.stopped) {
@@ -53,6 +56,12 @@ addEventListener('keydown', function (event) {
         simulation.canvas.fog.far = Math.min(500000, simulation.canvas.fog.far * 1.1);
     } else if (event.key === 's') {
         simulation.canvas.fog.far = Math.max(100, simulation.canvas.fog.far * 0.9);
+    } else if (event.key === 'ArrowUp') {
+        currentViewIndex = (currentViewIndex + 1) % views.length;
+        simulation.renderer.setView(views[currentViewIndex]);
+    } else if (event.key === 'ArrowDown') {
+        currentViewIndex = (currentViewIndex - 1 + views.length) % views.length;
+        simulation.renderer.setView(views[currentViewIndex]);
     }
 });
 
