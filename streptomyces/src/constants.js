@@ -5,7 +5,14 @@ export const Constants = {
     FOCUS_RADIUS: 150,
     TRUE_FOCI_SIZE: 15, 
     TIPOC_GROWTH_RATE: 0.00002, // This is the rate at which the TIPOC grows. The TIPOC grows by consuming macromolecules, so the growth rate is multiplied by the number of available macromolecules in the segment.
-   
+    //distance from the tip to the first RNAP patch appears to be around 1.8 µm +- 0.3 µm. 
+    // RNAP (RNA polymerase) patches are the sites of active transcription, and thus also the sites of translation and protein production.
+    DISTANCE_FROM_TIP_TO_FIRST_RNAP_PATCH: 1800, // nanometers
+    STANDARD_DEVIATION_FOR_RNAP_PATCH: 300, // nanometers. This is used to add some variability to the distance from the tip to the first RNAP patch, based on the experimental data.
+
+
+
+
     MINIMUM_ATP_CONCENTRATION:  (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The minimum concentration of ATP in living cells is arround 1mM per µm^3.
     MAX_ATP_CONCENTRATION: 5 * (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The maximum concentration of ATP in living cells is arround 5mM per µm^3.
     ATP_PRODUCTION_RATE: 0.0008, // Millions of Molecules per second per µm^3 of FOCI

@@ -34,34 +34,56 @@ export class HyphaeGrowth {
 
         Spore.branchHash = this._generateBranchHash(Spore.x, Spore.y, Spore.direction, Spore.availableMacromolecules, Spore.tipocSize, Spore.ATPConcentration);
         this.branches.push(Spore.branchHash);
+        Spore.distanceFromTheTip = Constants.SEGMENT_SPACING;
 
-        let newX = Spore.x + Math.cos(Spore.direction - Math.PI) * Constants.SEGMENT_SPACING;
+        // Add the other half of the spore, which grows in the opposite
+
+
+/*         let newX = Spore.x + Math.cos(Spore.direction - Math.PI) * Constants.SEGMENT_SPACING;
         let newY = Spore.y + Math.sin(Spore.direction - Math.PI) * Constants.SEGMENT_SPACING;
         let newZ = Spore.z;
 
         this._addNewCytoplasmSegment(
-            newX,
-            newY,
-            newZ,
+            Spore.x,
+            Spore.y,
+            Spore.z,
             Math.PI,
             Spore,
             segments,
             Constants.TIPOC_SPLITTING_SIZE * 0.95,
             4
         );
+ */
+        // option 2 for adding the second half of the spore
 
-        // Initial concentrations are set via the segment constructor (macmol=4)
-        // The solver reads from segments at the start of each step()
+    const otherSpore = new CytoplasmSegment(
+            0,
+            0,
+            0,
+            Math.PI,
+            0,
+            0,
+            Constants.TIPOC_SPLITTING_SIZE * 0.95,
+            4
+        );
+        segments.push(otherSpore);
+        this.totalLengthOfHyphae += Constants.SEGMENT_SPACING; // ← this is what's missing
+        otherSpore.branchHash = this._generateBranchHash(otherSpore.x, otherSpore.y, otherSpore.direction, otherSpore.availableMacromolecules, otherSpore.tipocSize, otherSpore.ATPConcentration);
+        this.branches.push(otherSpore.branchHash);
 
-        Spore.distanceFromTheTip = Constants.SEGMENT_SPACING;
+        Spore.addNeighbor(otherSpore);
+        otherSpore.addNeighbor(Spore);
+
+        
+
 
         this.lengthOfFirstBranch = 2;
 
         return segments;
     }
 
-    _addNewCytoplasmSegment(x, y, z, direction, lastSegment, segments, tipocsize, macmol) {
-        let newIndex = lastSegment.index + 1;
+    _addNewCytoplasmSegment(x, y, z, direction, lastSegment, segments, tipocsize, macmol, index) {
+        let newIndex = index !== undefined ? index : lastSegment.index + 1;
         this.totalLengthOfHyphae += Constants.SEGMENT_SPACING;
 
         const newSegment = new CytoplasmSegment(x, y, z, direction, newIndex, 0, tipocsize, macmol);
