@@ -132,7 +132,7 @@ export class Renderer {
 
  
         // TIPOC spheres (red)
-        const tipocGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, 20, 20, 0, Math.PI * 2.0, 0, Math.PI / 3);
+        const tipocGeo = new THREE.SphereGeometry(Constants.INT_CYTOPLASM_RADIUS, 20, 20, 0, Math.PI * 2.0, 0, Math.PI / 3);
         const tipocMat = new THREE.MeshBasicMaterial({ color: 0xff4444, wireframe: true });
         this.tipocMesh = new THREE.InstancedMesh(tipocGeo, tipocMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
         this.tipocMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -183,8 +183,8 @@ export class Renderer {
                 const growthDirection = seg.direction;
                 const rotationAngle = growthDirection - Math.PI / 2;
                 const growthDirectionVector = new THREE.Vector2(Math.cos(growthDirection), Math.sin(growthDirection));
-                const dx = growthDirectionVector.x * (Constants.CYTOPLASM_RADIUS - seg.tipocSize*Constants.CYTOPLASM_RADIUS);
-                const dy = growthDirectionVector.y * (Constants.CYTOPLASM_RADIUS - seg.tipocSize*Constants.CYTOPLASM_RADIUS);
+                const dx = growthDirectionVector.x * (Constants.INT_CYTOPLASM_RADIUS - seg.tipocSize*Constants.INT_CYTOPLASM_RADIUS);
+                const dy = growthDirectionVector.y * (Constants.INT_CYTOPLASM_RADIUS - seg.tipocSize*Constants.INT_CYTOPLASM_RADIUS);
                 _dummy.position.set(seg.x + dx, seg.y + dy, 0);
                 _dummy.rotation.set(0, 0, rotationAngle);
                 const scale = seg.tipocSize;
@@ -312,7 +312,7 @@ export class Renderer {
 
 
             //create a text sprite for the index of the segment///  units in micrometers
-            const text = ['b: ' + seg.branchHash, 'i: ' + seg.index, 'd: ' + (seg.distanceFromTheTip/1000).toFixed(2) + ' \u03BCm', 'm: ' + seg.availableMacromolecules.toFixed(2), 'a: ' + seg.ATPConcentration.toFixed(2)];
+            const text = ['bra: ' + seg.branchHash, 'ind: ' + seg.index, 'dft: ' + (seg.distanceFromTheTip/1000).toFixed(2) + ' \u03BCm', 'mac: ' + seg.availableMacromolecules.toFixed(2), 'atp: ' + seg.ATPConcentration.toFixed(2)];
             const indexSprite = _makeTextSprite(text);
             const rotationAngle = seg.direction - Math.PI / 2;
             let xPos = -Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle)  + seg.x;

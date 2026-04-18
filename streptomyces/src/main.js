@@ -50,7 +50,7 @@ addEventListener('keydown', function (event) {
         clearTimeout(_branchInputTimer);
         _branchInputTimer = setTimeout(_commitBranchInput, 200);
     } else if (event.key === 'w') {
-        simulation.canvas.fog.far = Math.min(100000, simulation.canvas.fog.far * 1.1);
+        simulation.canvas.fog.far = Math.min(500000, simulation.canvas.fog.far * 1.1);
     } else if (event.key === 's') {
         simulation.canvas.fog.far = Math.max(100, simulation.canvas.fog.far * 0.9);
     }

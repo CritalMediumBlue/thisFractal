@@ -16,7 +16,7 @@ export const Constants = {
     MINIMUM_ATP_CONCENTRATION:  (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The minimum concentration of ATP in living cells is arround 1mM per µm^3.
     MAX_ATP_CONCENTRATION: 5 * (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The maximum concentration of ATP in living cells is arround 5mM per µm^3.
     ATP_PRODUCTION_RATE: 0.0008, // Millions of Molecules per second per µm^3 of FOCI
-    ATP_TO_MACROMOLECULES: 500, // How many ATP molecules are required to produce one macromolecule
+    ATP_TO_MACROMOLECULES: 1000, // How many ATP molecules are required to produce one macromolecule
 
     // Geometry of the hyphae
     SEGMENT_SPACING: 310, // nm — real-world distance between cytoplasm segment centers
@@ -37,11 +37,11 @@ export const Constants = {
     MAX_FOCI_SIZE: 6.8,  // nanometers
     TRACE_EVERY_NTH_PARTICLE: 1, // to add a trace and follow the movement of the particles (foci).
     MAX_TRACE_LENGTH: 2000, // how many points are stored in the trace
-    DISPLACEMENT:1000, // nanometers — This tells us how the cytoplasm stretches at the tip each time it grows. Low values make the cytoplasm stretch only at the very tip, high values make the cytoplasm stretch along the whole hyphae.
+    DISPLACEMENT:2000, // nanometers — This tells us how the cytoplasm stretches at the tip each time it grows. Low values make the cytoplasm stretch only at the very tip, high values make the cytoplasm stretch along the whole hyphae.
     DECAY:4500, // nanometers
 
     //Diffusion of Foci
-    Do:((1.38e-23*293)/(6*Math.PI*6))*800*0.00001,
+    Do:((1.38e-23*293)/(6*Math.PI*6))*800*0.000001,
 
 
 
