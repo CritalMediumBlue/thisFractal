@@ -12,22 +12,37 @@ const _ringDir = new THREE.Vector3();
 function _makeTextSprite(lines) {
     if (!Array.isArray(lines)) lines = [lines];
     const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
+    canvas.width = 100;
+    canvas.height = 100;
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'black';
-    ctx.font = 'bold 30px Arial';
+    ctx.font = '14px Arial';
     ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    const lineHeight = 35;
-    const startY = 256 - ((lines.length - 1) * lineHeight) / 2;
-    for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], 256, startY + i * lineHeight);
-    }
+    ctx.textBaseline = 'top';
+    const lineHeight = 15;
+    const startY = lineHeight * 0.5;
     const texture = new THREE.CanvasTexture(canvas);
     const material = new THREE.SpriteMaterial({ map: texture, depthTest: false });
     const sprite = new THREE.Sprite(material);
-    sprite.scale.set(600, 600, 1);
+    sprite.scale.set(200,200, 1);
+
+    for (let i = 0; i < lines.length; i++) {
+        ctx.fillStyle = 'black';
+
+        ctx.fillText(lines[i], lineHeight/2, startY + i * lineHeight);
+
+        // draw the canvas boundary as a white rectangle for debugging and add a point
+        // at the center of the canvas to visualize the anchor point of the sprite
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'blue';
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        
+    }
+
     return sprite;
 }
 
@@ -41,11 +56,12 @@ export class Renderer {
         this._lastSegCount = -1;
         this._regularCount = 0;
         this._tipCount = 0;
+        this._stopped = null;
         this.labels = [];
         this.scene = null;
         this.helperAxis = new THREE.AxesHelper(5000);
         this.helperAxis.position.set(0.1, 0.1, 0.1); // slight offset to prevent z-fighting with segment meshes
-        this.helperGrid = new THREE.GridHelper(10000, 10);
+        this.helperGrid = new THREE.GridHelper(100000, 100);
         this.helperGrid.rotation.x = Math.PI / 2; // rotate to XY plane
         this._helpersVisible = false;
     }
@@ -54,7 +70,7 @@ export class Renderer {
         this.scene = scene;
         this._disposeMeshes(scene);
 
-        // Segment cylinders
+        // Segment Spheres
         const segGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, Constants.WIDTH_SEGMENTS, Constants.HEIGHT_SEGMENTS, 0, Math.PI * 2.0, Constants.THETA_START, Constants.THETA_LENGTH);
         const segMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
         this.segmentMesh = new THREE.InstancedMesh(segGeo, segMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
@@ -66,6 +82,10 @@ export class Renderer {
         this.segmentMesh.count = 0;
         this.segmentMesh.frustumCulled = false;
         scene.add(this.segmentMesh);
+
+
+
+        // Internal segment spheres
 
         const intSegGeo = new THREE.SphereGeometry(Constants.INT_CYTOPLASM_RADIUS, Constants.WIDTH_SEGMENTS, Constants.HEIGHT_SEGMENTS, 0, Math.PI * 2.0, Constants.THETA_START, Constants.THETA_LENGTH);
         const intSegMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
@@ -80,8 +100,28 @@ export class Renderer {
         scene.add(this.intSegmentMesh);
 
 
-        //Create the shapes for the separation of the hyphae as rings
-        const ringGeo = new THREE.RingGeometry(Constants.INT_CYTOPLASM_RADIUS*0.5, Constants.INT_CYTOPLASM_RADIUS*1, 32);
+        // Particle spheres Airi disk (smaller, green)
+        const partGeo = new THREE.SphereGeometry(Constants.FOCUS_RADIUS, 5, 5);
+        const partMat = new THREE.MeshBasicMaterial({ color: 0x66ff66, wireframe: true });
+        this.particleMesh = new THREE.InstancedMesh(partGeo, partMat, MAX_PARTICLES);
+        this.particleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        this.particleMesh.count = 0;
+        this.particleMesh.frustumCulled = false;
+        scene.add(this.particleMesh);
+
+
+        //Protein particle (true size of the foci) - also green but smaller than the Airi disk
+        const truePartGeo = new THREE.SphereGeometry(Constants.TRUE_FOCI_SIZE, 5, 5);
+        const truePartMat = new THREE.MeshBasicMaterial({ color: 0x66ff66, wireframe: true });
+        this.trueParticleMesh = new THREE.InstancedMesh(truePartGeo, truePartMat, MAX_PARTICLES);
+        this.trueParticleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        this.trueParticleMesh.count = 0;
+        this.trueParticleMesh.frustumCulled = false;
+        scene.add(this.trueParticleMesh);
+ 
+
+       //Create the shapes for the separation of the hyphae as rings
+        const ringGeo = new THREE.RingGeometry(Constants.INT_CYTOPLASM_RADIUS*0.5, Constants.INT_CYTOPLASM_RADIUS*1, 15);
         const ringMat = new THREE.MeshBasicMaterial({ color: 0x303030, side: THREE.DoubleSide });
         this.ringMesh = new THREE.InstancedMesh(ringGeo, ringMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
         this.ringMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -90,18 +130,6 @@ export class Renderer {
         scene.add(this.ringMesh);
 
  
-
-        
-
-        // Particle spheres (smaller, green)
-        const partGeo = new THREE.SphereGeometry(Constants.FOCUS_RADIUS, 6, 6);
-        const partMat = new THREE.MeshBasicMaterial({ color: 0x66ff66, opacity: 0.5, transparent: true });
-        this.particleMesh = new THREE.InstancedMesh(partGeo, partMat, MAX_PARTICLES);
-        this.particleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-        this.particleMesh.count = 0;
-        this.particleMesh.frustumCulled = false;
-        scene.add(this.particleMesh);
-
         // TIPOC spheres (red)
         const tipocGeo = new THREE.SphereGeometry(Constants.CYTOPLASM_RADIUS, 20, 20, 0, Math.PI * 2.0, 0, Math.PI / 3);
         const tipocMat = new THREE.MeshBasicMaterial({ color: 0xff4444, wireframe: true });
@@ -112,17 +140,21 @@ export class Renderer {
         scene.add(this.tipocMesh);
     }
 
-    draw(cytoplasmSegments, brownianParticles, segCount, canvas, stopped) {
+    draw(cytoplasmSegments, brownianParticles, segCount, canvas, stopped, selectedBranch) {
         const segmentsChanged = segCount !== this._lastSegCount;
+        const stoppedChanged = stopped !== this._stopped;
 
         if (segmentsChanged) {
             // Segments were added or reclassified (tip→regular) — rebuild matrices + colors
             this._rebuildSegmentMatrices(cytoplasmSegments, segCount, stopped);
             this._lastSegCount = segCount;
-        } else {
-            // Only ATP concentrations changed — update colors only
+        } else if (stoppedChanged || !stopped) {
+            // Update colors when: stopped state just changed, or simulation is running (ATP changes every step)
             this._updateSegmentColors(cytoplasmSegments, segCount, stopped);
         }
+        // else: paused and nothing changed — skip redundant color recalculation
+
+        this._stopped = stopped;
 
         // Brownian particles move every frame — always update
         const partCount = Math.min(brownianParticles.length, MAX_PARTICLES);
@@ -178,7 +210,11 @@ export class Renderer {
             this._helpersVisible = false;
         }
 
-        canvas.render();
+        // find the tip of the selected branch
+        // Find the tip of the selected branch (tipocSize > 0), falling back to the last segment with that hash
+        const branchSegments = cytoplasmSegments.slice(0, segCount).filter(seg => seg.branchHash === selectedBranch);
+        const selectedSegment = branchSegments.find(seg => seg.tipocSize > 0) ?? branchSegments[branchSegments.length - 1];
+        canvas.render(selectedSegment, selectedBranch, stopped);
     }
 
 
@@ -269,23 +305,22 @@ export class Renderer {
         for (let i = 0; i < segCount; i++) {
             const seg = cytoplasmSegments[i];
 
-            if (seg.tipocSize > 0 || seg.neighbors.length > 2 || seg.neighbors.length < 2 || seg.index === 0 || seg.index % 5 === 0) {
-                // Create a text sprite for the branch hash
-                const text = String('b: ' + seg.branchHash);
-                const sprite = _makeTextSprite(text);
-                const rotationAngle = seg.direction - Math.PI / 2;
-                sprite.position.set( Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle)  + seg.x, Constants.CYTOPLASM_RADIUS * Math.sin(rotationAngle) + seg.y, 0);
-                this.scene.add(sprite);
-                this.labels.push(sprite);
-            }
-
-      
 
             //create a text sprite for the index of the segment///  units in micrometers
-            const indexSprite = _makeTextSprite(['i: ' + seg.index, 'd: ' + (seg.distanceFromTheTip/1000).toFixed(2) + 
-                ' \u03BCm', 'm: ' + seg.availableMacromolecules.toFixed(2), 'a: ' + seg.ATPConcentration.toFixed(2)]);
+            const text = ['b: ' + seg.branchHash, 'i: ' + seg.index, 'd: ' + (seg.distanceFromTheTip/1000).toFixed(2) + ' \u03BCm', 'm: ' + seg.availableMacromolecules.toFixed(2), 'a: ' + seg.ATPConcentration.toFixed(2)];
+            const indexSprite = _makeTextSprite(text);
             const rotationAngle = seg.direction - Math.PI / 2;
-            indexSprite.position.set(-Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle)  + seg.x, -Constants.CYTOPLASM_RADIUS * Math.sin(rotationAngle) + seg.y, 0);
+            let xPos = -Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle)  + seg.x;
+            let yPos = -Constants.CYTOPLASM_RADIUS * Math.sin(rotationAngle) + seg.y;
+            // branching points need a different position for the label
+            if (seg.neighbors.length === 3 || (seg.neighbors.length === 2 && seg.tipocSize > 0)) {
+                xPos = -Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle + Math.PI / 2)  + seg.x;
+                yPos = -Constants.CYTOPLASM_RADIUS * Math.sin(rotationAngle + Math.PI / 2) + seg.y;
+            }
+            
+            indexSprite.position.set(xPos, yPos, 0);
+          
+            
             this.scene.add(indexSprite);
             this.labels.push(indexSprite);
         }
@@ -314,5 +349,7 @@ export class Renderer {
             scene.remove(this.helperGrid);
             this._helpersVisible = false;
         }
+        this._lastSegCount = -1;
+        this._stopped = null;
     }
 }

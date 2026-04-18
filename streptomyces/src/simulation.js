@@ -28,6 +28,7 @@ export class Simulation {
         this.renderer.init(this.canvas.scene);
         this.stats.init();
         this.numberOfCytoplasmSegments = 0;
+        this.stopped = false;
     }
 
     get time() {
@@ -76,7 +77,7 @@ export class Simulation {
 
             exportTraces(this.particleManager.brownianParticles);
 
-            this.draw(false);
+            this.draw(this.stopped);
 
             const link = document.createElement('a');
             const filename = `final_simulation_${this.stats.time}.png`;
@@ -88,13 +89,14 @@ export class Simulation {
         }
     }
 
-    draw(stopped) {
+    draw(stopped, selectedBranch) {
         this.renderer.draw(
             this.hyphaeGrowth.cytoplasmSegments,
             this.particleManager.brownianParticles,
             this.numberOfCytoplasmSegments,
             this.canvas,
-            stopped
+            stopped,
+            selectedBranch
         );
 
 

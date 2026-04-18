@@ -43,7 +43,12 @@ export class Canvas {
         });
     }
 
-    render() {
+    render(branchTip, selectedBranch, stopped) {
+        if (selectedBranch !== 0 && branchTip) {
+            this.camera.position.set(branchTip.x, branchTip.y, this.camera.position.z);
+            this.camera.lookAt(branchTip.x, branchTip.y, 0);
+            this.controls.target.set(branchTip.x, branchTip.y, 0);
+        }
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
     }
