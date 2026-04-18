@@ -7,7 +7,6 @@ await RAPIER.init();
 const simulation = new Simulation();
 let selectedBranch = 0; // You can set this to a specific branch hash to focus on that branch
 
-
 function updateSimulation() {
     if (!simulation.stopped) {
         simulation.update();
@@ -49,14 +48,11 @@ addEventListener('keydown', function (event) {
         // Accumulate digits; commit after 500ms of no further input or on Enter
         _branchInputBuffer += event.key;
         clearTimeout(_branchInputTimer);
-        _branchInputTimer = setTimeout(_commitBranchInput, 500);
-    } else if (event.key === 'Enter' && _branchInputBuffer.length > 0) {
-        clearTimeout(_branchInputTimer);
-        _commitBranchInput();
-    } else if (event.key === 'Escape') {
-        clearTimeout(_branchInputTimer);
-        _branchInputBuffer = '';
-        selectedBranch = 0; // Reset — deselect branch
+        _branchInputTimer = setTimeout(_commitBranchInput, 200);
+    } else if (event.key === 'w') {
+        simulation.canvas.fog.far = Math.min(100000, simulation.canvas.fog.far * 1.1);
+    } else if (event.key === 's') {
+        simulation.canvas.fog.far = Math.max(100, simulation.canvas.fog.far * 0.9);
     }
 });
 

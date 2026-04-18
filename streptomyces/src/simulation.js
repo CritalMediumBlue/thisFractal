@@ -89,6 +89,10 @@ export class Simulation {
         }
     }
 
+    setFogFar(value) {
+        this.canvas.setFogFar(value);
+    }
+
     draw(stopped, selectedBranch) {
         this.renderer.draw(
             this.hyphaeGrowth.cytoplasmSegments,

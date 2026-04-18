@@ -51,6 +51,7 @@ export class Renderer {
         this.segmentMesh = null;
         this.intSegmentMesh = null;
         this.particleMesh = null;
+        this.trueParticleMesh = null;
         this.tipocMesh = null;
         this.ringMesh = null;
         this._lastSegCount = -1;
@@ -101,7 +102,7 @@ export class Renderer {
 
 
         // Particle spheres Airi disk (smaller, green)
-        const partGeo = new THREE.SphereGeometry(Constants.FOCUS_RADIUS, 5, 5);
+        const partGeo = new THREE.SphereGeometry(Constants.FOCUS_RADIUS, 7, 7);
         const partMat = new THREE.MeshBasicMaterial({ color: 0x66ff66, wireframe: true });
         this.particleMesh = new THREE.InstancedMesh(partGeo, partMat, MAX_PARTICLES);
         this.particleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -111,8 +112,8 @@ export class Renderer {
 
 
         //Protein particle (true size of the foci) - also green but smaller than the Airi disk
-        const truePartGeo = new THREE.SphereGeometry(Constants.TRUE_FOCI_SIZE, 5, 5);
-        const truePartMat = new THREE.MeshBasicMaterial({ color: 0x66ff66, wireframe: true });
+        const truePartGeo = new THREE.SphereGeometry(Constants.TRUE_FOCI_SIZE, 7, 7);
+        const truePartMat = new THREE.MeshBasicMaterial({ color: 0x20FF20, wireframe: true });
         this.trueParticleMesh = new THREE.InstancedMesh(truePartGeo, truePartMat, MAX_PARTICLES);
         this.trueParticleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
         this.trueParticleMesh.count = 0;
@@ -159,6 +160,7 @@ export class Renderer {
         // Brownian particles move every frame — always update
         const partCount = Math.min(brownianParticles.length, MAX_PARTICLES);
         this.particleMesh.count = partCount;
+        this.trueParticleMesh.count = partCount;
 
         for (let i = 0; i < partCount; i++) {
             const p = brownianParticles[i];
@@ -167,8 +169,11 @@ export class Renderer {
             _dummy.scale.set(1, 1, 1);
             _dummy.updateMatrix();
             this.particleMesh.setMatrixAt(i, _dummy.matrix);
+            this.trueParticleMesh.setMatrixAt(i, _dummy.matrix);
         }
         this.particleMesh.instanceMatrix.needsUpdate = true;
+        this.trueParticleMesh.instanceMatrix.needsUpdate = true;
+
 
         // TIPOC spheres grow each frame — always update
         let tipocCount = 0;
@@ -178,8 +183,8 @@ export class Renderer {
                 const growthDirection = seg.direction;
                 const rotationAngle = growthDirection - Math.PI / 2;
                 const growthDirectionVector = new THREE.Vector2(Math.cos(growthDirection), Math.sin(growthDirection));
-                const dx = growthDirectionVector.x * (Constants.INT_CYTOPLASM_RADIUS - seg.tipocSize*330);
-                const dy = growthDirectionVector.y * (Constants.INT_CYTOPLASM_RADIUS - seg.tipocSize*330);
+                const dx = growthDirectionVector.x * (Constants.CYTOPLASM_RADIUS - seg.tipocSize*Constants.CYTOPLASM_RADIUS);
+                const dy = growthDirectionVector.y * (Constants.CYTOPLASM_RADIUS - seg.tipocSize*Constants.CYTOPLASM_RADIUS);
                 _dummy.position.set(seg.x + dx, seg.y + dy, 0);
                 _dummy.rotation.set(0, 0, rotationAngle);
                 const scale = seg.tipocSize;
@@ -316,6 +321,9 @@ export class Renderer {
             if (seg.neighbors.length === 3 || (seg.neighbors.length === 2 && seg.tipocSize > 0)) {
                 xPos = -Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle + Math.PI / 2)  + seg.x;
                 yPos = -Constants.CYTOPLASM_RADIUS * Math.sin(rotationAngle + Math.PI / 2) + seg.y;
+            } else if (seg.tipocSize > 0) {
+                xPos = -Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle - Math.PI / 2)  + seg.x;
+                yPos = -Constants.CYTOPLASM_RADIUS * Math.sin(rotationAngle - Math.PI / 2) + seg.y;
             }
             
             indexSprite.position.set(xPos, yPos, 0);
@@ -327,7 +335,7 @@ export class Renderer {
     }
 
     _disposeMeshes(scene) {
-        const meshes = ['segmentMesh', 'intSegmentMesh', 'particleMesh', 'tipocMesh', 'ringMesh'];
+        const meshes = ['segmentMesh', 'intSegmentMesh', 'trueParticleMesh','particleMesh', 'tipocMesh', 'ringMesh'];
         for (const name of meshes) {
             if (this[name]) {
                 scene.remove(this[name]);
