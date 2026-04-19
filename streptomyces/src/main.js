@@ -6,9 +6,10 @@ await RAPIER.init();
 
 const simulation = new Simulation();
 let selectedBranch = 0; // You can set this to a specific branch hash to focus on that branch
-const views = ['atp', 'debug']
-let currentViewIndex = 0;
-
+const molecule = ['atp', 'nadh']
+let currentMoleculeIndex = 0;
+const shapes = ['sphereShape', 'capsuleShape']
+let currentShapeIndex = 0;
 
 function updateSimulation() {
     if (!simulation.stopped) {
@@ -57,11 +58,11 @@ addEventListener('keydown', function (event) {
     } else if (event.key === 's') {
         simulation.canvas.fog.far = Math.max(100, simulation.canvas.fog.far * 0.9);
     } else if (event.key === 'ArrowUp') {
-        currentViewIndex = (currentViewIndex + 1) % views.length;
-        simulation.renderer.setView(views[currentViewIndex]);
+        currentMoleculeIndex = (currentMoleculeIndex + 1) % molecule.length;
+        simulation.renderer.setView(molecule[currentMoleculeIndex]);
     } else if (event.key === 'ArrowDown') {
-        currentViewIndex = (currentViewIndex - 1 + views.length) % views.length;
-        simulation.renderer.setView(views[currentViewIndex]);
+        currentMoleculeIndex = (currentMoleculeIndex - 1 + molecule.length) % molecule.length;
+        simulation.renderer.setView(molecule[currentMoleculeIndex]);
     }
 });
 

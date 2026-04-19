@@ -8,6 +8,7 @@ const _color = new THREE.Color();
 const grayColor = new THREE.Color(0x606060);
 const _zAxis = new THREE.Vector3(0, 0, 1);
 const _ringDir = new THREE.Vector3();
+const capsulesEvery = 6; // how many segments between each capsule/ring
 
 function _makeTextSprite(lines) {
     if (!Array.isArray(lines)) lines = [lines];
@@ -54,6 +55,8 @@ export class Renderer {
         this.trueParticleMesh = null;
         this.tipocMesh = null;
         this.ringMesh = null;
+        this.outerCapsuleMesh = null;
+        this.innerCapsuleMesh = null;
         this._lastSegCount = -1;
         this._regularCount = 0;
         this._tipCount = 0;
@@ -131,6 +134,32 @@ export class Renderer {
         scene.add(this.ringMesh);
 
  
+        // Outer capsule hyphae (alternative rendering)
+        const outerCapGeo = new THREE.CapsuleGeometry(Constants.CYTOPLASM_RADIUS, (capsulesEvery-3)*Constants.SEGMENT_SPACING, 4, 16);
+        const outerCapMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
+        this.outerCapsuleMesh = new THREE.InstancedMesh(outerCapGeo, outerCapMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
+        this.outerCapsuleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        this.outerCapsuleMesh.instanceColor = new THREE.InstancedBufferAttribute(
+            new Float32Array(Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS * 3), 3
+        );
+        this.outerCapsuleMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+        this.outerCapsuleMesh.count = 0;
+        this.outerCapsuleMesh.frustumCulled = false;
+        scene.add(this.outerCapsuleMesh);
+
+        // Inner capsule hyphae (alternative rendering)
+        const innerCapGeo = new THREE.CapsuleGeometry(Constants.INT_CYTOPLASM_RADIUS, (capsulesEvery-3)*Constants.SEGMENT_SPACING, 4, 16);
+        const innerCapMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
+        this.innerCapsuleMesh = new THREE.InstancedMesh(innerCapGeo, innerCapMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
+        this.innerCapsuleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        this.innerCapsuleMesh.instanceColor = new THREE.InstancedBufferAttribute(
+            new Float32Array(Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS * 3), 3
+        );
+        this.innerCapsuleMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+        this.innerCapsuleMesh.count = 0;
+        this.innerCapsuleMesh.frustumCulled = false;
+        scene.add(this.innerCapsuleMesh);
+
         // TIPOC spheres (red)
         const tipocGeo = new THREE.SphereGeometry(Constants.INT_CYTOPLASM_RADIUS, 20, 20, 0, Math.PI * 2.0, 0, Math.PI / 3);
         const tipocMat = new THREE.MeshBasicMaterial({ color: 0xff4444, wireframe: true });
@@ -240,19 +269,39 @@ export class Renderer {
             this.intSegmentMesh.setMatrixAt(i, _dummy.matrix);
         }
 
-        // Pass 2: septa ring matrices — placed at segments where finishedCell > 0
+        // Pass 2: septa ring matrices
         let ringCount = 0;
         for (let i = 0; i < segCount; i++) {
             const seg = cytoplasmSegments[i];
-            if (seg.index % 20 === 0) {
-                _dummy.position.set(seg.x, seg.y, 0);
-                _dummy.scale.set(1, 1, 1);
-                // Orient ring perpendicular to the hyphae growth direction
-                _ringDir.set(Math.cos(seg.direction), Math.sin(seg.direction), 0);
-                _dummy.quaternion.setFromUnitVectors(_zAxis, _ringDir);
-                _dummy.updateMatrix();
-                this.ringMesh.setMatrixAt(ringCount, _dummy.matrix);
-                ringCount++;
+            if (seg.index % capsulesEvery === 0) {
+                if (seg.distanceFromTheTip > Constants.SEGMENT_SPACING * (capsulesEvery / 2 ) || seg.index === 0) {
+                    _dummy.position.set(seg.x, seg.y, 0);
+                    _dummy.scale.set(1, 1, 1);
+                    _ringDir.set(Math.cos(seg.direction), Math.sin(seg.direction), 0);
+                    _dummy.quaternion.setFromUnitVectors(_zAxis, _ringDir);
+                    _dummy.updateMatrix();
+                    this.ringMesh.setMatrixAt(ringCount, _dummy.matrix);
+                    ringCount++;
+                }
+            }
+        }
+
+        // Pass 3: capsule matrices — offset by 4 relative to rings
+        let capsuleCount = 0;
+        for (let i = 0; i < segCount; i++) {
+            const seg = cytoplasmSegments[i];
+            if ((seg.index + capsulesEvery / 2) % capsulesEvery === 0) {
+                if (seg.distanceFromTheTip > Constants.SEGMENT_SPACING * (capsulesEvery / 2 ) || seg.index === 4) {
+                    _dummy.position.set(seg.x, seg.y, 0);
+                    _dummy.scale.set(1, 1, 1);
+                    // CapsuleGeometry elongates along Y, rotate Z by (direction - π/2) to align Y with growth
+                    _dummy.quaternion.identity();
+                    _dummy.rotation.set(0, 0, seg.direction - Math.PI / 2);
+                    _dummy.updateMatrix();
+                    this.outerCapsuleMesh.setMatrixAt(capsuleCount, _dummy.matrix);
+                    this.innerCapsuleMesh.setMatrixAt(capsuleCount, _dummy.matrix);
+                    capsuleCount++;
+                }
             }
         }
 
@@ -260,6 +309,10 @@ export class Renderer {
         this.segmentMesh.instanceMatrix.needsUpdate = true;
         this.intSegmentMesh.count = segCount;
         this.intSegmentMesh.instanceMatrix.needsUpdate = true;
+        this.outerCapsuleMesh.count = capsuleCount;
+        this.outerCapsuleMesh.instanceMatrix.needsUpdate = true;
+        this.innerCapsuleMesh.count = capsuleCount;
+        this.innerCapsuleMesh.instanceMatrix.needsUpdate = true;
         this.ringMesh.count = ringCount;
         this.ringMesh.instanceMatrix.needsUpdate = true;
 
@@ -271,6 +324,7 @@ export class Renderer {
     }
 
     _applySegmentColors(cytoplasmSegments, segCount, stopped) {
+        let capsuleIndex = 0;
         for (let i = 0; i < segCount; i++) {
             const seg = cytoplasmSegments[i];
             viridisToThreeColor(seg.ATPConcentration, _color);
@@ -288,10 +342,18 @@ export class Renderer {
 
             this.segmentMesh.setColorAt(i, colorDim);
             this.intSegmentMesh.setColorAt(i, colorBright);
+
+            if ((seg.index ) % capsulesEvery === 0) {
+                this.outerCapsuleMesh.setColorAt(capsuleIndex, colorDim);
+                this.innerCapsuleMesh.setColorAt(capsuleIndex, colorBright);
+                capsuleIndex++;
+            }
         }
 
         if (this.segmentMesh.instanceColor) this.segmentMesh.instanceColor.needsUpdate = true;
         if (this.intSegmentMesh.instanceColor) this.intSegmentMesh.instanceColor.needsUpdate = true;
+        if (this.outerCapsuleMesh.instanceColor) this.outerCapsuleMesh.instanceColor.needsUpdate = true;
+        if (this.innerCapsuleMesh.instanceColor) this.innerCapsuleMesh.instanceColor.needsUpdate = true;
     }
 
     _removeLabels() {
@@ -335,7 +397,7 @@ export class Renderer {
     }
 
     _disposeMeshes(scene) {
-        const meshes = ['segmentMesh', 'intSegmentMesh', 'trueParticleMesh','particleMesh', 'tipocMesh', 'ringMesh'];
+        const meshes = ['segmentMesh', 'intSegmentMesh', 'trueParticleMesh', 'particleMesh', 'tipocMesh', 'ringMesh', 'outerCapsuleMesh', 'innerCapsuleMesh'];
         for (const name of meshes) {
             if (this[name]) {
                 scene.remove(this[name]);

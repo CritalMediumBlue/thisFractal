@@ -24,7 +24,7 @@ export const Constants = {
     INT_CYTOPLASM_RADIUS: 310, // nanometers
     THETA_START: Math.PI/3  , // Starting angle for segment spheres (radians)
     THETA_LENGTH:  Math.PI/3, // Angular length for segment spheres (radians)
-    WIDTH_SEGMENTS: 20, 
+    WIDTH_SEGMENTS: 14, 
     HEIGHT_SEGMENTS: 1,
     WIDTH_SEGMENTS_TIP: 15,
     HEIGHT_SEGMENTS_TIP: 3,
