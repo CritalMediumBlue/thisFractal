@@ -42,7 +42,7 @@ export const Constants = {
     DECAY:6000, // nanometers
 
     //Diffusion of Foci
-    Do:0,//((1.38e-23*293)/(6*Math.PI*6))*800*0.00001,
+    Do:((1.38e-23*293)/(6*Math.PI*6))*0.0000005,
 
 
 
@@ -51,7 +51,7 @@ export const Constants = {
 
 
     //Measuring distances
-    MAX_TIME:60*60*4,//60*60*8, // 8 hours
+    MAX_TIME:60*60*7,//60*60*8, // 8 hours
 
 
 

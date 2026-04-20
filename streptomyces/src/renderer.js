@@ -236,7 +236,7 @@ export class Renderer {
         // Find the tip of the selected branch (tipocSize > 0), falling back to the last segment with that hash
         const branchSegments = cytoplasmSegments.slice(0, segCount).filter(seg => seg.branchHash === selectedBranch);
         const selectedSegment = branchSegments.find(seg => seg.tipocSize > 0) ?? branchSegments[branchSegments.length - 1];
-        canvas.render(selectedSegment, selectedBranch, stopped);
+        canvas.render(selectedSegment, selectedBranch);
     }
 
 
@@ -366,14 +366,14 @@ export class Renderer {
             let yPos = -Constants.CYTOPLASM_RADIUS * Math.sin(rotationAngle) + seg.y;
             // branching points need a different position for the label
             if (seg.neighbors.length === 3 || (seg.neighbors.length === 2 && seg.tipocSize > 0)) {
-                xPos = -Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle + Math.PI / 2)  + seg.x;
-                yPos = -Constants.CYTOPLASM_RADIUS * Math.sin(rotationAngle + Math.PI / 2) + seg.y;
+                xPos = seg.x;//-Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle + Math.PI / 2)  + seg.x;
+                yPos = seg.y;//-Constants.CYTOPLASM_RADIUS * Math.sin(rotationAngle + Math.PI / 2) + seg.y;
             } else if (seg.tipocSize > 0) {
-                xPos = -Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle - Math.PI / 2)  + seg.x;
-                yPos = -Constants.CYTOPLASM_RADIUS * Math.sin(rotationAngle - Math.PI / 2) + seg.y;
+                xPos = seg.x;//-Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle - Math.PI / 2)  + seg.x;
+                yPos = seg.y;//-Constants.CYTOPLASM_RADIUS * Math.sin(rotationAngle - Math.PI / 2) + seg.y;
             }
             
-            indexSprite.position.set(xPos, yPos, 0);
+            indexSprite.position.set(seg.x, seg.y, Constants.CYTOPLASM_RADIUS);
           
             
             this.scene.add(indexSprite);

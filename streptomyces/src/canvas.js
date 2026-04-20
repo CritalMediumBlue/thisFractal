@@ -43,15 +43,17 @@ export class Canvas {
         });
     }
 
-    render(branchTip, selectedBranch, stopped) {
-        if (selectedBranch !== 0 && branchTip) {
-            this.camera.position.set(branchTip.x, branchTip.y, this.camera.position.z);
-            this.camera.lookAt(branchTip.x, branchTip.y, 0);
-            this.controls.target.set(branchTip.x, branchTip.y, 0);
-        }
-        this.controls.update();
-        this.renderer.render(this.scene, this.camera);
+render(branchTip, selectedBranch) {
+    if (selectedBranch !== 0 && branchTip) {
+        // Shift camera and target together — preserves zoom, pan, orbit angle
+        const offsetX = this.camera.position.x - this.controls.target.x;
+        const offsetY = this.camera.position.y - this.controls.target.y;
+        this.controls.target.set(branchTip.x, branchTip.y, 0);
+        this.camera.position.set(branchTip.x + offsetX, branchTip.y + offsetY, this.camera.position.z);
     }
+    this.controls.update();
+    this.renderer.render(this.scene, this.camera);
+}
 
     setFogFar(value) {
         this.fog.far = Math.max(1000, value);
