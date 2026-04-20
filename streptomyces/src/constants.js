@@ -2,7 +2,7 @@ export const Constants = {
     //TIPOC Constants (TIPOC = TIP Organizing Center), the TIPOC is a structure that is responsible for the growth of the tip of the hyphae.
     TIPOC_SPLITTING_SIZE:1, // Once the TIPOC reaches this size, it will asymmetrically split into two TIPOCs. Branching the hyphae in the future.
     SLOW_UPDATE: 5,
-    FOCUS_RADIUS: 20,//150,
+    FOCUS_RADIUS: 210,
     TRUE_FOCI_SIZE: 7.5, 
     TIPOC_GROWTH_RATE: 0.00002, // This is the rate at which the TIPOC grows. The TIPOC grows by consuming macromolecules, so the growth rate is multiplied by the number of available macromolecules in the segment.
     //distance from the tip to the first RNAP patch appears to be around 1.8 µm +- 0.3 µm. 
@@ -38,7 +38,7 @@ export const Constants = {
     MAX_FOCI_SIZE: 6.8,  // nanometers
     TRACE_EVERY_NTH_PARTICLE: 1, // to add a trace and follow the movement of the particles (foci).
     MAX_TRACE_LENGTH: 2000, // how many points are stored in the trace
-    DISPLACEMENT:10000, // nanometers — This tells us how the cytoplasm stretches at the tip each time it grows. Low values make the cytoplasm stretch only at the very tip, high values make the cytoplasm stretch along the whole hyphae.
+    DISPLACEMENT:2000, // nanometers — This tells us how the cytoplasm stretches at the tip each time it grows. Low values make the cytoplasm stretch only at the very tip, high values make the cytoplasm stretch along the whole hyphae.
     DECAY:6000, // nanometers
 
     //Diffusion of Foci
