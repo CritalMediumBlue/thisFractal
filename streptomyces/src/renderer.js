@@ -8,7 +8,7 @@ const _color = new THREE.Color();
 const grayColor = new THREE.Color(0x606060);
 const _zAxis = new THREE.Vector3(0, 0, 1);
 const _ringDir = new THREE.Vector3();
-const capsulesEvery = 6; // how many segments between each capsule/ring
+const capsulesEvery = 4; // how many segments between each capsule/ring
 
 function _makeTextSprite(lines) {
     if (!Array.isArray(lines)) lines = [lines];
@@ -55,7 +55,6 @@ export class Renderer {
         this.trueParticleMesh = null;
         this.tipocMesh = null;
         this.ringMesh = null;
-        this.outerCapsuleMesh = null;
         this.innerCapsuleMesh = null;
         this._lastSegCount = -1;
         this._regularCount = 0;
@@ -91,7 +90,7 @@ export class Renderer {
 
         // Internal segment spheres
 
-        const intSegGeo = new THREE.SphereGeometry(Constants.INT_CYTOPLASM_RADIUS, Constants.WIDTH_SEGMENTS, Constants.HEIGHT_SEGMENTS, 0, Math.PI * 2.0, Constants.THETA_START, Constants.THETA_LENGTH);
+        const intSegGeo = new THREE.SphereGeometry(Constants.INT_CYTOPLASM_RADIUS, Constants.WIDTH_SEGMENTS_INT, Constants.HEIGHT_SEGMENTS, 0, Math.PI * 2.0, Constants.THETA_START, Constants.THETA_LENGTH);
         const intSegMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
         this.intSegmentMesh = new THREE.InstancedMesh(intSegGeo, intSegMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
         this.intSegmentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -105,7 +104,7 @@ export class Renderer {
 
 
         // Particle spheres Airi disk (smaller, green)
-        const partGeo = new THREE.SphereGeometry(Constants.FOCUS_RADIUS, 7, 7);
+        const partGeo = new THREE.SphereGeometry(Constants.FOCUS_RADIUS, 6, 6);
         const partMat = new THREE.MeshBasicMaterial({ color: 0x66ff66, wireframe: true });
         this.particleMesh = new THREE.InstancedMesh(partGeo, partMat, MAX_PARTICLES);
         this.particleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -134,21 +133,10 @@ export class Renderer {
         scene.add(this.ringMesh);
 
  
-        // Outer capsule hyphae (alternative rendering)
-        const outerCapGeo = new THREE.CapsuleGeometry(Constants.CYTOPLASM_RADIUS, (capsulesEvery-3)*Constants.SEGMENT_SPACING, 4, 16);
-        const outerCapMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
-        this.outerCapsuleMesh = new THREE.InstancedMesh(outerCapGeo, outerCapMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
-        this.outerCapsuleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-        this.outerCapsuleMesh.instanceColor = new THREE.InstancedBufferAttribute(
-            new Float32Array(Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS * 3), 3
-        );
-        this.outerCapsuleMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
-        this.outerCapsuleMesh.count = 0;
-        this.outerCapsuleMesh.frustumCulled = false;
-        scene.add(this.outerCapsuleMesh);
+  
 
         // Inner capsule hyphae (alternative rendering)
-        const innerCapGeo = new THREE.CapsuleGeometry(Constants.INT_CYTOPLASM_RADIUS, (capsulesEvery-3)*Constants.SEGMENT_SPACING, 4, 16);
+        const innerCapGeo = new THREE.CapsuleGeometry(Constants.INT_CYTOPLASM_RADIUS, (capsulesEvery-2)*Constants.SEGMENT_SPACING, 4, 16);
         const innerCapMat = new THREE.MeshBasicMaterial({ vertexColors: false, wireframe: true });
         this.innerCapsuleMesh = new THREE.InstancedMesh(innerCapGeo, innerCapMat, Constants.MAX_NUMBER_OF_CYTOPLASM_SEGMENTS);
         this.innerCapsuleMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -262,7 +250,7 @@ export class Renderer {
             _dummy.rotation.set(0, 0, seg.direction - Math.PI / 2);
             if (seg.neighbors.length === 2 && seg.tipocSize > 0 || seg.neighbors.length === 3) {
                 _dummy.rotation.set(0, 0, seg.direction);
-            }
+            } 
             _dummy.scale.set(1, 1, 1);
             _dummy.updateMatrix();
             this.segmentMesh.setMatrixAt(i, _dummy.matrix);
@@ -273,8 +261,8 @@ export class Renderer {
         let ringCount = 0;
         for (let i = 0; i < segCount; i++) {
             const seg = cytoplasmSegments[i];
-            if (seg.index % capsulesEvery === 0) {
-                if (seg.distanceFromTheTip > Constants.SEGMENT_SPACING * (capsulesEvery / 2 ) || seg.index === 0) {
+            if (seg.index % (capsulesEvery*2) === 0) {
+                if (seg.distanceFromTheTip > Constants.SEGMENT_SPACING * (capsulesEvery / 2 )*4 || seg.index === 0) {
                     _dummy.position.set(seg.x, seg.y, 0);
                     _dummy.scale.set(1, 1, 1);
                     _ringDir.set(Math.cos(seg.direction), Math.sin(seg.direction), 0);
@@ -290,15 +278,14 @@ export class Renderer {
         let capsuleCount = 0;
         for (let i = 0; i < segCount; i++) {
             const seg = cytoplasmSegments[i];
-            if ((seg.index + capsulesEvery / 2) % capsulesEvery === 0) {
-                if (seg.distanceFromTheTip > Constants.SEGMENT_SPACING * (capsulesEvery / 2 ) || seg.index === 4) {
+            if ((seg.index + capsulesEvery / 2) % capsulesEvery === 0 && seg.neighbors.length === 2) {
+                if (seg.distanceFromTheTip > Constants.SEGMENT_SPACING * (capsulesEvery / 2 )*4 || seg.index === 4) {
                     _dummy.position.set(seg.x, seg.y, 0);
                     _dummy.scale.set(1, 1, 1);
                     // CapsuleGeometry elongates along Y, rotate Z by (direction - π/2) to align Y with growth
                     _dummy.quaternion.identity();
                     _dummy.rotation.set(0, 0, seg.direction - Math.PI / 2);
                     _dummy.updateMatrix();
-                    this.outerCapsuleMesh.setMatrixAt(capsuleCount, _dummy.matrix);
                     this.innerCapsuleMesh.setMatrixAt(capsuleCount, _dummy.matrix);
                     capsuleCount++;
                 }
@@ -309,8 +296,6 @@ export class Renderer {
         this.segmentMesh.instanceMatrix.needsUpdate = true;
         this.intSegmentMesh.count = segCount;
         this.intSegmentMesh.instanceMatrix.needsUpdate = true;
-        this.outerCapsuleMesh.count = capsuleCount;
-        this.outerCapsuleMesh.instanceMatrix.needsUpdate = true;
         this.innerCapsuleMesh.count = capsuleCount;
         this.innerCapsuleMesh.instanceMatrix.needsUpdate = true;
         this.ringMesh.count = ringCount;
@@ -344,7 +329,6 @@ export class Renderer {
             this.intSegmentMesh.setColorAt(i, colorBright);
 
             if ((seg.index ) % capsulesEvery === 0) {
-                this.outerCapsuleMesh.setColorAt(capsuleIndex, colorDim);
                 this.innerCapsuleMesh.setColorAt(capsuleIndex, colorBright);
                 capsuleIndex++;
             }
@@ -352,7 +336,6 @@ export class Renderer {
 
         if (this.segmentMesh.instanceColor) this.segmentMesh.instanceColor.needsUpdate = true;
         if (this.intSegmentMesh.instanceColor) this.intSegmentMesh.instanceColor.needsUpdate = true;
-        if (this.outerCapsuleMesh.instanceColor) this.outerCapsuleMesh.instanceColor.needsUpdate = true;
         if (this.innerCapsuleMesh.instanceColor) this.innerCapsuleMesh.instanceColor.needsUpdate = true;
     }
 
@@ -374,7 +357,9 @@ export class Renderer {
 
 
             //create a text sprite for the index of the segment///  units in micrometers
-            const text = ['bra: ' + seg.branchHash, 'ind: ' + seg.index, 'dft: ' + (seg.distanceFromTheTip/1000).toFixed(2) + ' \u03BCm', 'mac: ' + seg.availableMacromolecules.toFixed(2), 'atp: ' + seg.ATPConcentration.toFixed(2)];
+            const text = ['bra: ' + seg.branchHash, 'ind: ' + seg.index, 'dft: ' + (seg.distanceFromTheTip/1000).toFixed(2) + ' \u03BCm', 'mac: ' + seg.availableMacromolecules.toFixed(2), 'atp: ' + seg.ATPConcentration.toFixed(2),
+                'nof: ' + seg.closestFoci.length
+            ];
             const indexSprite = _makeTextSprite(text);
             const rotationAngle = seg.direction - Math.PI / 2;
             let xPos = -Constants.CYTOPLASM_RADIUS * Math.cos(rotationAngle)  + seg.x;
@@ -397,7 +382,7 @@ export class Renderer {
     }
 
     _disposeMeshes(scene) {
-        const meshes = ['segmentMesh', 'intSegmentMesh', 'trueParticleMesh', 'particleMesh', 'tipocMesh', 'ringMesh', 'outerCapsuleMesh', 'innerCapsuleMesh'];
+        const meshes = ['segmentMesh', 'intSegmentMesh', 'trueParticleMesh', 'particleMesh', 'tipocMesh', 'ringMesh', 'innerCapsuleMesh'];
         for (const name of meshes) {
             if (this[name]) {
                 scene.remove(this[name]);

@@ -33,6 +33,7 @@ export class ParticleManager {
             const closestCytoplasmSegment = this.findClosestCytoplasmSegment(particle);
             particle.applyBrownianImpulse(closestCytoplasmSegment, this.physicsWorld);
         });
+        
 
         // 2. Step the Rapier physics world (resolves collisions)
         this.physicsWorld.step();
@@ -100,21 +101,12 @@ export class ParticleManager {
         return closestCytoplasmSegment;
     }
 
-    addNewBrownianParticle(cytoplasmSegments, numberOfCytoplasmSegments, lastSegment) {
-        const branchHash = lastSegment.branchHash;
-
-        let randomSegment = cytoplasmSegments[Math.floor(Math.random() * numberOfCytoplasmSegments)];
-        while (randomSegment.branchHash !== branchHash || randomSegment.distanceFromTheTip >= 4000) {
-            randomSegment = cytoplasmSegments[Math.floor(Math.random() * numberOfCytoplasmSegments)];
-        }
-
-        const newX = randomSegment.x;
-        const newY = randomSegment.y;
-
+    addNewBrownianParticle(lastSegment) {
+        // lastSegment is the tip that just triggered elongation — place the new focus there directly.
         const newParticle = new BrownianParticle(
-            newX,
-            newY,
-            randomSegment,
+            lastSegment.x,
+            lastSegment.y,
+            lastSegment,
             (this.brownianParticles.length) % Constants.TRACE_EVERY_NTH_PARTICLE === 0,
             Constants.INIT_FOCI_SIZE
         );

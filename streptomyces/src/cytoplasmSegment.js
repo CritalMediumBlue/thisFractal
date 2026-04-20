@@ -11,7 +11,7 @@ export class CytoplasmSegment {
         this.index = index; // Index of the segment in the hyphae. This is used to calculate the distance from the spore to the tip of the hyphae.
         this.closestFoci = [];
         this.branchHash = null; // This is used to identify the branch that the segment belongs to. 
-        this.distanceFromTheTip = Constants.CYTOPLASM_RADIUS; 
+        this.distanceFromTheTip = Constants.INT_CYTOPLASM_RADIUS; 
         this.consumptionOfATPInOneSecond = 0; 
         this.consumptionOfMacromoleculesInOneSecond = 0;
         this.tipocSize = tipocSize;

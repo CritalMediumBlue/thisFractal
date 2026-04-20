@@ -9,11 +9,17 @@ export class HyphaeGrowth {
         this.cytoplasmSegments = [];
         this.numberOfCytoplasmSegments = 0;
         this.numberOfBranches = 0;
+        this.tipSegments = [];        // active tip segments (tipocSize > 0)
+        this.branchSegments = new Map(); // branchId -> CytoplasmSegment[]
     }
 
     init(solver) {
         this.branches = [];
         this.totalLengthOfHyphae = 0;
+        this.numberOfBranches = 0;
+        this.lengthOfFirstBranch = 0;
+        this.tipSegments = [];
+        this.branchSegments = new Map();
         this.cytoplasmSegments = this._initializeCytoplasmSegments(solver);
         this.numberOfCytoplasmSegments = 0;
     }
@@ -32,8 +38,10 @@ export class HyphaeGrowth {
 
         const segments = [Spore];
 
-        Spore.branchHash = this._generateBranchHash(Spore.x, Spore.y, Spore.direction, Spore.availableMacromolecules, Spore.tipocSize, Spore.ATPConcentration);
+        Spore.branchHash = this._nextBranchId();
         this.branches.push(Spore.branchHash);
+        this.branchSegments.set(Spore.branchHash, [Spore]);
+        this.tipSegments.push(Spore);
         Spore.distanceFromTheTip = Constants.SEGMENT_SPACING;
 
         // Add the other half of the spore, which grows in the opposite
@@ -68,8 +76,10 @@ export class HyphaeGrowth {
         );
         segments.push(otherSpore);
         this.totalLengthOfHyphae += Constants.SEGMENT_SPACING; // ← this is what's missing
-        otherSpore.branchHash = this._generateBranchHash(otherSpore.x, otherSpore.y, otherSpore.direction, otherSpore.availableMacromolecules, otherSpore.tipocSize, otherSpore.ATPConcentration);
+        otherSpore.branchHash = this._nextBranchId();
         this.branches.push(otherSpore.branchHash);
+        this.branchSegments.set(otherSpore.branchHash, [otherSpore]);
+        this.tipSegments.push(otherSpore);
 
         Spore.addNeighbor(otherSpore);
         otherSpore.addNeighbor(Spore);
@@ -90,56 +100,52 @@ export class HyphaeGrowth {
         segments.push(newSegment);
         const hash = lastSegment.branchHash;
         newSegment.branchHash = hash;
+        this.branchSegments.get(hash).push(newSegment);
         if (hash === this.branches[0]) {
             this.lengthOfFirstBranch++;
         }
 
         lastSegment.addNeighbor(newSegment);
         newSegment.addNeighbor(lastSegment);
+        return newSegment;
     }
 
     updateCytoplasmSegments(brownianParticles, particleManager, numberOfCytoplasmSegments, physicsWorld) {
-        this.cytoplasmSegments.forEach(lastPoint => {
-            if (lastPoint.tipocSize > Constants.TIPOC_SPLITTING_SIZE / 2 && lastPoint.finishedCell > Constants.MACROMOLECULES_REQUIRED_FOR_ELONGATION) {
+        // Snapshot tipSegments — _elongateCytoplasm modifies the array during iteration
+        const currentTips = [...this.tipSegments];
+        currentTips.forEach(cytoplasmSegment => {
+            if (cytoplasmSegment.tipocSize > Constants.TIPOC_SPLITTING_SIZE / 2 && cytoplasmSegment.finishedCell > Constants.MACROMOLECULES_REQUIRED_FOR_ELONGATION) {
                 // Stretching mechanism at the tip
                 brownianParticles.forEach(particle => {
                     const segment = particle.previousSegment;
-                    const disp = Constants.DISPLACEMENT;
-                    const displacement = (1 / ((segment.distanceFromTheTip / disp) + 1)) * (Constants.SEGMENT_SPACING);
 
-                    if (segment.originalBranchHash === lastPoint.branchHash) {
-                        particle.x += Math.cos(segment.originalDirection) * displacement;
-                        particle.y += Math.sin(segment.originalDirection) * displacement;
-                    } else if (segment.branchHash === lastPoint.branchHash) {
-                        particle.x += Math.cos(segment.direction) * displacement;
-                        particle.y += Math.sin(segment.direction) * displacement;
-                    }
+                    if (segment.branchHash === cytoplasmSegment.branchHash || segment.originalBranchHash === cytoplasmSegment.branchHash) {
+                        const disp = Constants.DISPLACEMENT;
+                        const displacement = (1 / (((segment.distanceFromTheTip) / disp) + 1)) * (Constants.SEGMENT_SPACING);
 
-                    // Clamp particle back inside its closest segment after tip displacement
-                    const dxTip = particle.x - segment.x;
-                    const dyTip = particle.y - segment.y;
-                    const distSqTip = dxTip * dxTip + dyTip * dyTip;
-                    const limitTip = Constants.INT_CYTOPLASM_RADIUS;
-                    if (distSqTip > limitTip * limitTip) {
-                        const scaleTip = limitTip / Math.sqrt(distSqTip);
-                        particle.x = segment.x + dxTip * scaleTip;
-                        particle.y = segment.y + dyTip * scaleTip;
-                    }
+                        if (segment.originalBranchHash === cytoplasmSegment.branchHash) {
+                            particle.x += Math.cos(segment.originalDirection) * displacement;
+                            particle.y += Math.sin(segment.originalDirection) * displacement;
+                        } else {
+                            particle.x += Math.cos(segment.direction) * displacement;
+                            particle.y += Math.sin(segment.direction) * displacement;
+                        }
 
-                    // Sync displaced position to Rapier body
-                    physicsWorld.syncPosition(particle);
-                });
-
-                this.cytoplasmSegments.forEach(point => {
-                    if (point.branchHash === lastPoint.branchHash) {
-                        point.distanceFromTheTip += Constants.SEGMENT_SPACING;
+                        // Sync displaced position to Rapier body
+                        physicsWorld.syncPosition(particle);
                     }
                 });
-                this._elongateCytoplasm(lastPoint, particleManager, numberOfCytoplasmSegments);
+
+                // Update distanceFromTheTip only for segments on this branch (O(branch length))
+                const branchSegs = this.branchSegments.get(cytoplasmSegment.branchHash);
+                if (branchSegs) {
+                    branchSegs.forEach(point => { point.distanceFromTheTip += Constants.SEGMENT_SPACING; });
+                }
+                this._elongateCytoplasm(cytoplasmSegment, particleManager, numberOfCytoplasmSegments);
             }
 
-            if (lastPoint.tipocSize > 0 && lastPoint.tipocSize < Constants.TIPOC_SPLITTING_SIZE) {
-                lastPoint.tipocSize += Constants.TIPOC_GROWTH_RATE * lastPoint.availableMacromolecules;
+            if (cytoplasmSegment.tipocSize > 0 && cytoplasmSegment.tipocSize < Constants.TIPOC_SPLITTING_SIZE) {
+                cytoplasmSegment.tipocSize += Constants.TIPOC_GROWTH_RATE * cytoplasmSegment.availableMacromolecules;
             }
         });
     }
@@ -150,32 +156,40 @@ export class HyphaeGrowth {
             lastPoint.y + Math.sin(lastPoint.direction) * Constants.SEGMENT_SPACING,
             lastPoint.z
         ];
+        let newSegment 
         const newDirection = lastPoint.direction + (Math.random() - 0.5) * Constants.CURVINESS;
         if (lastPoint.tipocSize >= Constants.TIPOC_SPLITTING_SIZE) {
             const newTipoCSize = lastPoint.tipocSize * (0.5 + Math.random() / 2);
             lastPoint.tipocSize = lastPoint.tipocSize - newTipoCSize;
             lastPoint.originalDirection = newDirection;
             lastPoint.direction = Math.random() < 0.5 ? newDirection + Math.PI / 2 : lastPoint.direction - Math.PI / 2;
-            this._addNewCytoplasmSegment(newX, newY, newZ, newDirection, lastPoint, this.cytoplasmSegments, newTipoCSize, 0);
-            const branchHash = this._generateBranchHash();
+            newSegment = this._addNewCytoplasmSegment(newX, newY, newZ, newDirection, lastPoint, this.cytoplasmSegments, newTipoCSize, 0);
+            this.tipSegments.push(newSegment); // newSegment is the new continuation tip
+            const branchHash = this._nextBranchId();
             const originalBranchHash = lastPoint.branchHash;
             lastPoint.originalBranchHash = originalBranchHash;
             lastPoint.branchHash = branchHash;
             this.branches.push(branchHash);
+            // Move lastPoint from the continuation branch to the new lateral branch
+            const origList = this.branchSegments.get(originalBranchHash);
+            origList.splice(origList.indexOf(lastPoint), 1);
+            this.branchSegments.set(branchHash, [lastPoint]);
         } else {
-            this._addNewCytoplasmSegment(newX, newY, newZ, newDirection, lastPoint, this.cytoplasmSegments, lastPoint.tipocSize, 0);
+            newSegment = this._addNewCytoplasmSegment(newX, newY, newZ, newDirection, lastPoint, this.cytoplasmSegments, lastPoint.tipocSize, 0);
             lastPoint.tipocSize = 0;
+            // Transfer tip ownership: lastPoint is no longer a tip, newSegment takes over
+            this.tipSegments.splice(this.tipSegments.indexOf(lastPoint), 1);
+            this.tipSegments.push(newSegment);
         }
 
-        if (lastPoint.index % Constants.ADD_FOCI_EVERY === 0) {
-            particleManager.addNewBrownianParticle(this.cytoplasmSegments, numberOfCytoplasmSegments, lastPoint);
+        if (newSegment.index % Constants.ADD_FOCI_EVERY === 0) {
+            particleManager.addNewBrownianParticle( newSegment);
         }
     }
 
 
 
-    _generateBranchHash() {
-
+    _nextBranchId() {
         this.numberOfBranches++;
         return this.numberOfBranches;
     }

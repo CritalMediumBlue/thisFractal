@@ -50,6 +50,7 @@ addEventListener('keydown', function (event) {
         downloadCanvasImage(canvas, `simulation_${simulation.time/120}.png`);
     } else if (event.key >= '0' && event.key <= '9') {
         // Accumulate digits; commit after 500ms of no further input or on Enter
+        console.log('Digit pressed:', event.key);
         _branchInputBuffer += event.key;
         clearTimeout(_branchInputTimer);
         _branchInputTimer = setTimeout(_commitBranchInput, 200);

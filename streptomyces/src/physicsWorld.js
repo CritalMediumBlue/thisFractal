@@ -11,11 +11,14 @@ export class PhysicsWorld {
     }
 
     init() {
+        if (this.world) {
+            this.world.free(); // release WASM-backed memory before replacing
+        }
+        this.particleBodies.clear();
+        this.particleColliders.clear();
+
         const gravity = { x: 0.0, y: 0.0 };
         this.world = new RAPIER.World(gravity);
-        // More aggressive solver for faster penetration resolution
-        this.world.integrationParameters.numSolverIterations = 20;
-        this.world.integrationParameters.numAdditionalFrictionIterations = 0;
     }
 
     addParticle(particle) {
@@ -23,15 +26,15 @@ export class PhysicsWorld {
             .setTranslation(particle.x, particle.y)
             .setGravityScale(0.0)
             .setLinearDamping(0.0)
-            .setCcdEnabled(true)
-            .setCanSleep(false);
+            .setCcdEnabled(false)
+            .setCanSleep(false); // sleeping bodies stop responding to contacts — must stay awake
         const rigidBody = this.world.createRigidBody(rigidBodyDesc);
         rigidBody.lockRotations(true, true);
 
-        const colliderDesc = RAPIER.ColliderDesc.ball(Constants.FOCUS_RADIUS)
+        const colliderDesc = RAPIER.ColliderDesc.ball(Constants.FOCUS_RADIUS*2)
             .setRestitution(1)
             .setFriction(0.0)
-            .setMass(2);
+            .setMass(1);
         const collider = this.world.createCollider(colliderDesc, rigidBody);
 
         this.particleBodies.set(particle, rigidBody);
@@ -50,7 +53,9 @@ export class PhysicsWorld {
     }
 
     step() {
+         for (let i = 0; i < 100; i++) { // substeps for more stable collisions
         this.world.step();
+        } 
     }
 
     readPosition(particle) {

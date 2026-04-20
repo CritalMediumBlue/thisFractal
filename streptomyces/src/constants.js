@@ -2,8 +2,8 @@ export const Constants = {
     //TIPOC Constants (TIPOC = TIP Organizing Center), the TIPOC is a structure that is responsible for the growth of the tip of the hyphae.
     TIPOC_SPLITTING_SIZE:1, // Once the TIPOC reaches this size, it will asymmetrically split into two TIPOCs. Branching the hyphae in the future.
     SLOW_UPDATE: 5,
-    FOCUS_RADIUS: 150,
-    TRUE_FOCI_SIZE: 15, 
+    FOCUS_RADIUS: 20,//150,
+    TRUE_FOCI_SIZE: 7.5, 
     TIPOC_GROWTH_RATE: 0.00002, // This is the rate at which the TIPOC grows. The TIPOC grows by consuming macromolecules, so the growth rate is multiplied by the number of available macromolecules in the segment.
     //distance from the tip to the first RNAP patch appears to be around 1.8 µm +- 0.3 µm. 
     // RNAP (RNA polymerase) patches are the sites of active transcription, and thus also the sites of translation and protein production.
@@ -16,7 +16,7 @@ export const Constants = {
     MINIMUM_ATP_CONCENTRATION:  (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The minimum concentration of ATP in living cells is arround 1mM per µm^3.
     MAX_ATP_CONCENTRATION: 5 * (1/1000000)*6.022e23 *0.8/1e18, // millions of molecules per segment. This data is based on the literature. The maximum concentration of ATP in living cells is arround 5mM per µm^3.
     ATP_PRODUCTION_RATE: 0.0008, // Millions of Molecules per second per µm^3 of FOCI
-    ATP_TO_MACROMOLECULES: 1000, // How many ATP molecules are required to produce one macromolecule
+    ATP_TO_MACROMOLECULES: 1200, // How many ATP molecules are required to produce one macromolecule
 
     // Geometry of the hyphae
     SEGMENT_SPACING: 310, // nm — real-world distance between cytoplasm segment centers
@@ -24,24 +24,25 @@ export const Constants = {
     INT_CYTOPLASM_RADIUS: 310, // nanometers
     THETA_START: Math.PI/3  , // Starting angle for segment spheres (radians)
     THETA_LENGTH:  Math.PI/3, // Angular length for segment spheres (radians)
-    WIDTH_SEGMENTS: 14, 
+    WIDTH_SEGMENTS: 12, 
     HEIGHT_SEGMENTS: 1,
+    WIDTH_SEGMENTS_INT: 6,
     WIDTH_SEGMENTS_TIP: 15,
     HEIGHT_SEGMENTS_TIP: 3,
-    CURVINESS: 0.35, // Higher values make t8he hyphae more tortuous, lower values make the hyphae more straight
+    CURVINESS: 0.3, // Higher values make t8he hyphae more tortuous, lower values make the hyphae more straight
     MACROMOLECULES_REQUIRED_FOR_ELONGATION:0.3, // This tells us how many macromolecules have to be consumed in each cytoplasm segment for the hyphae to elongate (Add a new segment at the tip).
 
     // Brownian particles (foci) constants
-    ADD_FOCI_EVERY: 2,  //every 2th cytoplasm segment a green fluorescent foci is added
+    ADD_FOCI_EVERY: 3,  //every 2th cytoplasm segment a green fluorescent foci is added
     INIT_FOCI_SIZE: 6.6, // nanometers
     MAX_FOCI_SIZE: 6.8,  // nanometers
     TRACE_EVERY_NTH_PARTICLE: 1, // to add a trace and follow the movement of the particles (foci).
     MAX_TRACE_LENGTH: 2000, // how many points are stored in the trace
-    DISPLACEMENT:2000, // nanometers — This tells us how the cytoplasm stretches at the tip each time it grows. Low values make the cytoplasm stretch only at the very tip, high values make the cytoplasm stretch along the whole hyphae.
-    DECAY:4500, // nanometers
+    DISPLACEMENT:10000, // nanometers — This tells us how the cytoplasm stretches at the tip each time it grows. Low values make the cytoplasm stretch only at the very tip, high values make the cytoplasm stretch along the whole hyphae.
+    DECAY:6000, // nanometers
 
     //Diffusion of Foci
-    Do:((1.38e-23*293)/(6*Math.PI*6))*800*0.000001,
+    Do:0,//((1.38e-23*293)/(6*Math.PI*6))*800*0.00001,
 
 
 
