@@ -38,7 +38,7 @@ export const Constants = {
     MAX_FOCI_SIZE: 6.8,  // nanometers
     TRACE_EVERY_NTH_PARTICLE: 1, // to add a trace and follow the movement of the particles (foci).
     MAX_TRACE_LENGTH: 2000, // how many points are stored in the trace
-    DISPLACEMENT:2000, // nanometers — This tells us how the cytoplasm stretches at the tip each time it grows. Low values make the cytoplasm stretch only at the very tip, high values make the cytoplasm stretch along the whole hyphae.
+    DISPLACEMENT:4000, // nanometers — This tells us how the cytoplasm stretches at the tip each time it grows. Low values make the cytoplasm stretch only at the very tip, high values make the cytoplasm stretch along the whole hyphae.
     DECAY:6000, // nanometers
 
     //Diffusion of Foci

@@ -101,16 +101,14 @@ export class ParticleManager {
         return closestCytoplasmSegment;
     }
 
-    addNewBrownianParticle(lastSegment) {
-        // lastSegment is the tip that just triggered elongation — place the new focus there directly.
+    addNewBrownianParticle(targetSegment) {
         const newParticle = new BrownianParticle(
-            lastSegment.x,
-            lastSegment.y,
-            lastSegment,
+            targetSegment.x,
+            targetSegment.y,
+            targetSegment,
             (this.brownianParticles.length) % Constants.TRACE_EVERY_NTH_PARTICLE === 0,
             Constants.INIT_FOCI_SIZE
         );
-
         this.brownianParticles.push(newParticle);
         this.physicsWorld.addParticle(newParticle);
     }

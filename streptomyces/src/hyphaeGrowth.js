@@ -120,18 +120,16 @@ export class HyphaeGrowth {
                     const segment = particle.previousSegment;
 
                     if (segment.branchHash === cytoplasmSegment.branchHash || segment.originalBranchHash === cytoplasmSegment.branchHash) {
-                        const disp = Constants.DISPLACEMENT;
-                        const relativeDisplacementx = particle.x - segment.x;
-                        const relativeDisplacementy = particle.y - segment.y;
-                        const distanceFromSegment = Math.sqrt(relativeDisplacementx * relativeDisplacementx + relativeDisplacementy * relativeDisplacementy);
-
-                        const angleToSegment = Math.atan2(relativeDisplacementy, relativeDisplacementx);
-                        const angleOfStretching = segment.originalBranchHash === cytoplasmSegment.branchHash ? segment.originalDirection : segment.direction;
-                        const angleDifference = Math.abs(angleToSegment - angleOfStretching);
-                        const effectiveDistance = distanceFromSegment * Math.cos(angleDifference);
-
                         
-                        const displacement = (1 / (((segment.distanceFromTheTip - effectiveDistance - Constants.SEGMENT_SPACING) / disp) + 1)) * (Constants.SEGMENT_SPACING);
+                        const angleOfStretching = segment.originalBranchHash === cytoplasmSegment.branchHash
+                            ? segment.originalDirection
+                            : segment.direction;
+                        const displacement = this._stretching(
+                            segment.distanceFromTheTip,
+                            particle.x, particle.y,
+                            segment.x, segment.y,
+                            angleOfStretching
+                        );
 
                         if (segment.originalBranchHash === cytoplasmSegment.branchHash) {
                             particle.x += Math.cos(segment.originalDirection) * displacement;
@@ -158,6 +156,18 @@ export class HyphaeGrowth {
                 cytoplasmSegment.tipocSize += Constants.TIPOC_GROWTH_RATE * cytoplasmSegment.availableMacromolecules;
             }
         });
+    }
+
+    _stretching(distanceFromTip, particleX, particleY, segmentX, segmentY, angleOfStretching) {
+        const relativeX = particleX - segmentX;
+        const relativeY = particleY - segmentY;
+        const distanceFromSegment = Math.sqrt(relativeX * relativeX + relativeY * relativeY);
+        const angleToSegment = Math.atan2(relativeY, relativeX);
+        const angleDifference = Math.abs(angleToSegment - angleOfStretching);
+        const effectiveDistance = distanceFromSegment * Math.cos(angleDifference);
+        const trueDistance = distanceFromTip -effectiveDistance - Constants.SEGMENT_SPACING;
+        //return (1 / ((trueDistance / Constants.DISPLACEMENT) + 1)) * Constants.SEGMENT_SPACING;
+        return (1 / (1+Math.exp(trueDistance-Constants.DISPLACEMENT))) * Constants.SEGMENT_SPACING;
     }
 
     _elongateCytoplasm(lastPoint, particleManager, numberOfCytoplasmSegments) {
@@ -193,7 +203,20 @@ export class HyphaeGrowth {
         }
 
         if (newSegment.index % Constants.ADD_FOCI_EVERY === 0) {
-            particleManager.addNewBrownianParticle( lastPoint);
+             
+            const maxDistanceFromTip = 30
+            let randomOffset = Math.floor(Math.random() * maxDistanceFromTip);
+            let targetSegment;
+            while (randomOffset >= 0) {
+                const targetIndex = Math.max(lastPoint.index - randomOffset, 0);
+                targetSegment = this.cytoplasmSegments.find(seg => seg.index === targetIndex && seg.branchHash === lastPoint.branchHash);
+                if (targetSegment) break;
+                randomOffset--;
+            }
+            if (targetSegment) {
+                //console.log('add new particle at', targetSegment.distanceFromTheTip);
+                particleManager.addNewBrownianParticle(targetSegment);
+            }
         }
     }
 
